@@ -59,7 +59,9 @@ class YahooDownloader:
             temp_df = yf.download(tic, start=self.shift_start_date, end=self.shift_end_date, progress=False)
             # temp_df = yf.download(tic, start=self.start_date, end=self.end_date)
             temp_df["tic"] = tic
-            data_df = data_df.append(temp_df)
+            #data_df = data_df.append(temp_df)
+
+            data_df = pd.concat([data_df, temp_df], join='outer')
         # reset the index, we want to use numbers as index instead of dates
         
         data_df = data_df.reset_index()
