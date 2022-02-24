@@ -95,6 +95,7 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
                 if done:
                     recorder.ptfl_values.append(trade_info["portfolio_value"])
                     recorder.rewards.append(trajectory_reward)
+                    print(t)
                     break
         
         agent.update()
