@@ -31,7 +31,7 @@ class YahooDownloader:
     def __init__(self, state_day_length, start_date: str, end_date: str, ticker_list: list):
         
         start_date = pd.to_datetime(start_date)
-        start_date_shift = start_date + datetime.timedelta(days=-2*(state_day_length))
+        start_date_shift = start_date + datetime.timedelta(days=-3*(state_day_length+20))
         shift_start_date = str(start_date_shift.date())
         self.shift_start_date = shift_start_date
         
