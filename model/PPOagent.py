@@ -56,7 +56,7 @@ class ActorCritic(nn.Module):
         elif agent_name == 'PPO_EIIE':
             self.CNN = CNN_EIIE(args, day_length, action_dim)
         else:
-            raise NotImplementError
+            raise NotImplementedError
             
         self.critic = FNN(args, action_dim, self.hidden_dim1,
                           self.hidden_dim2, self.output_dim)

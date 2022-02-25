@@ -20,7 +20,7 @@ EPS = 1e-8
 
 def train(args, agent, ae, recorder, target_stocks, train_history, train_dating, train_start_date, iteration, path):
     agent.train()
-    #agent.std = args.action_std_train
+    
     action_dim = len(target_stocks) + 1
     sample_times = args.trajectory_sample_times
     rfr = risk_free_return()

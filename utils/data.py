@@ -62,7 +62,7 @@ def define_dates(args, year=None, Q=None):
         raise ValueError('Case not defined')
         
     if args.test:
-        return  val_end, test_end
+        return val_end, test_end
     elif args.backtest:
         return train_start, train_end
     else:
