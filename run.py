@@ -45,7 +45,7 @@ def main():
                 policy_learn(args, agent, ae, target_stocks, path, year, Q)  
     # test   
     else:
-        test_dir = './save_/2022-02-23/171934/'
+        test_dir = './save_/2022-02-25/013418/'
         testcases = []
         with open(test_dir+'test.txt', 'r') as f:
             for line in f:
