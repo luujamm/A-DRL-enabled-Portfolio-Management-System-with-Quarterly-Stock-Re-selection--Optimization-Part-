@@ -28,7 +28,6 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
     iteration_start_time = time.time()
     train_history, train_dating, train_data = transform_data(args, train_history, train_dating)
     
-    
     # recorder
     train_correct = 0
     # recorder
@@ -37,7 +36,6 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
         index_bias = 51
     else: 
         index_bias = 21
-    
     max_period = len(train_dating) - args.state_length - index_bias - 1
     args.train_period_length = max_period
     #assert args.train_period_length <= max_period, 'Max period should be {}'.format(max_period) 
@@ -49,10 +47,7 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
         env = PortfolioEnv(args, train_history, train_data, action_dim, 
                                train_dating, train_history, steps=args.train_period_length,
                            sample_start_date=train_start_date)
-                               #epi_end_idx=epi_end_idx)
-        #for i in range(train_history.shape[1]):
-        #    print(train_history[1, i, :])
-        #exit()
+                               
         for st in range(sample_times):
             trajectory_reward = 0
             state, observation, _ = env.reset()
@@ -97,7 +92,6 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
                     recorder.rewards.append(trajectory_reward)
                     
                     break
-        
         agent.update()
                 
     mean_reward = np.mean(recorder.rewards) / args.train_period_length
@@ -149,7 +143,6 @@ def policy_learn(args, agent, ae, target_stocks, path, year, Q):
     if args.case == 3:
         path = create_q_path(path, quarter)
     write_abstract(args, path, target_stocks, train_start_date, train_end_date)
-
     for it in range(args.train_iter):
         agent.setup_seed_(seed)
         train_recorder.clear()

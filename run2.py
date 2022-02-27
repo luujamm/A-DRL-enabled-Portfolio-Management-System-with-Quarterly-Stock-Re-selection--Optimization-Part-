@@ -37,18 +37,18 @@ def main():
     if not args.test and not args.backtest: 
         path = create_path(args)
         
-        year = 2018
+        year = None
         Q = 1
         target_stocks, action_dim = targets(year=year, Q=Q, num=20)
         agent = Agent(args, action_dim, agent_name)
         policy_learn(args, agent, ae, target_stocks, path, year, Q)  
     # test   
     else: 
-        year = 2018
+        year = None
         Q = 1
         target_stocks, action_dim = targets(year=year, Q=Q, num=20)
         agent = Agent(args, action_dim, agent_name)
-        test_dir = './save_/2022-02-24/044144'
+        test_dir = './save_/2022-02-27/124145'
         #test_dir = './save_/vs_deep_breath'
         if args.case == 3:
             test_dir += ('/' + str(year) + 'Q' + str(Q))

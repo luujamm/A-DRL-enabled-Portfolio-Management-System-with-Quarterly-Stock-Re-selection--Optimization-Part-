@@ -110,8 +110,8 @@ class DataGenerator(object):
             # compute index corresponding to start_date for repeatable sequence
             self.idx = date_to_index(self.start_date, self.dating) - self.start_idx
             self.steps = self._history_data.shape[1] - self.idx - 1
-            
-            
+
+
             assert self.idx >= self.window_length and self.idx <= self._history_data.shape[1] - self.steps, \
                 'Invalid start date, must be window_length day after start date and simulation steps day before end date'
             
@@ -140,7 +140,7 @@ class DataGenerator(object):
     def _step(self):
         # get observation matrix from history, exclude volume, maybe volume is useful as it
         # indicates how market total investment changes. Normalize could be critical here
-        self.step += 1
+        self.step += 1  
         state = self.state_data[:, self.step:self.step + self.window_length, :].copy()
         obs = self.history_data[:, self.step - 1:self.step + self.window_length, :].copy()
         #print(self.step, self.step + self.window_length)

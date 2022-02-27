@@ -203,8 +203,8 @@ class CNN_EIIE(nn.Module):
             nn.Conv2d(in_channels=self.in_ch1, out_channels=self.out_ch1,
                       kernel_size=(1, self.cvks1), stride=1,
                       padding=(0, int((self.cvks1-1)/2))),
-            #nn.BatchNorm2d(num_features=self.out_ch1, eps=1e-05, momentum=0.1, 
-            #                affine=True, track_running_stats=True),
+            nn.BatchNorm2d(num_features=self.out_ch1, eps=1e-05, momentum=0.1, 
+                            affine=True, track_running_stats=True),
             nn.ReLU()
         )
         
@@ -212,8 +212,8 @@ class CNN_EIIE(nn.Module):
         self.Conv2 = nn.Sequential(         # input shape (, ,  )
             nn.Conv2d(in_channels=self.out_ch1, out_channels=self.out_ch2,
                       kernel_size=(1, self.cvks2), stride=1),
-            #nn.BatchNorm2d(num_features=self.out_ch2, eps=1e-05, momentum=0.1, 
-            #               affine=True, track_running_stats=True),
+            nn.BatchNorm2d(num_features=self.out_ch2, eps=1e-05, momentum=0.1, 
+                           affine=True, track_running_stats=True),
             nn.ReLU()
         )
         
@@ -221,8 +221,8 @@ class CNN_EIIE(nn.Module):
         self.Conv3 = nn.Sequential(         # input shape ( ,  ,  )
             nn.Conv2d(in_channels=self.out_ch2+1, out_channels=self.out_ch3,
                       kernel_size=1, stride=1),
-            #nn.BatchNorm2d(num_features=self.out_ch3, eps=1e-05, momentum=0.1, 
-            #               affine=True, track_running_stats=True),
+            nn.BatchNorm2d(num_features=self.out_ch3, eps=1e-05, momentum=0.1, 
+                           affine=True, track_running_stats=True),
         )
         
     def forward(self, s, w):

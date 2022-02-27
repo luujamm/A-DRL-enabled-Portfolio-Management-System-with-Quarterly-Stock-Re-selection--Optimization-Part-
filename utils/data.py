@@ -53,10 +53,10 @@ def define_dates(args, year=None, Q=None):
         train_start = '2002-01-02'
         train_end, val_end, test_end = '2017-05-19', '2018-03-19', '2018-07-27'#'2021-01-12'
     elif args.case == 5: #DP test3
-        train_start = '2002-01-02'
+        train_start = '2010-01-04'
         train_end, val_end, test_end = '2015-04-06', '2016-02-01', '2016-06-09'#'2021-01-12'
     elif args.case == 6:
-        train_start = '2009-05-06'
+        train_start = '2006-05-06'
         train_end, val_end, test_end = '2011-12-06', '2012-10-03', '2013-02-14'#'2021-01-12'
     else:
         raise ValueError('Case not defined')

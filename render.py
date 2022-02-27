@@ -12,7 +12,7 @@ def load_value(dates, values, file):
         value *= values[-1]
     return np.concatenate((values, value))
 
-test_dir = './save_/2022-02-22/140137/'
+test_dir = './save_/2022-02-25/013418/'
 
 years = [2018, 2019, 2020, 2021]
 quarters = [1, 2, 3, 4]
