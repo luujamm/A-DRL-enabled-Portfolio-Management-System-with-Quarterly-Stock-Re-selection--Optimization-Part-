@@ -1,6 +1,6 @@
-from create_test_file import create_testfile
+from utils.create_test_file import create_testfile
 from run import main as run
-from render import render
+from utils.render import render
 
 create_testfile()
 run()
