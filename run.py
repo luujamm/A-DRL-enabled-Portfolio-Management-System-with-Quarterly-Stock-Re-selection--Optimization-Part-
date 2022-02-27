@@ -3,6 +3,7 @@
 import os
 from train import policy_learn
 from test import policy_test
+from path import test_path
 from model.PPOagent import Agent
 from model.autoencoder import Autoencoder
 from utils.define_args import define_args
@@ -45,7 +46,7 @@ def main():
                 policy_learn(args, agent, ae, target_stocks, path, year, Q)  
     # test   
     else:
-        test_dir = './save_/2022-02-26/002801/'
+        test_dir = test_path()
         testcases = []
         with open(test_dir+'test.txt', 'r') as f:
             for line in f:
