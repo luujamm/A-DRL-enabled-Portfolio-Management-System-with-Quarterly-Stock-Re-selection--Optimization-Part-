@@ -48,7 +48,7 @@ def define_args():
     parser.add_argument('--dist_entropy_coef', default=1e-2, type=float)
     
     # train
-    parser.add_argument('--train_iter', default=50, type=int)
+    parser.add_argument('--train_iter', default=30, type=int)
         
     # test
     parser.add_argument('-i', '--iter', default='all')
