@@ -37,7 +37,7 @@ def main():
     if not args.test and not args.backtest: 
         path = create_path(args)
         
-        year = None
+        year = 2021
         Q = 1
         target_stocks, action_dim = targets(year=year, Q=Q, num=20)
         agent = Agent(args, action_dim, agent_name)
