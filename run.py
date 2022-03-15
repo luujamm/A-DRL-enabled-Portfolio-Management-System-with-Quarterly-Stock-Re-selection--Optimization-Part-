@@ -39,7 +39,7 @@ def main():
     # train
     if not args.test and not args.backtest:  
         path = create_path(args)
-        for year in years[:]:
+        for year in years[1:]:
             for Q in quaters[:]:
                 target_stocks, action_dim = targets(year=year, Q=Q, num=20)
                 agent = Agent(args, action_dim, agent_name)

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import datetime
 import yfinance as yf
+import csv
 # from utils.data_new import date_to_index, index_to_date
 
 
@@ -121,8 +122,9 @@ def get_history(abbreviation, state_day_length, START_DATE, END_DATE):
     
     for ticker in target_stocks:
         hist.append(np.expand_dims(df_hist[df_hist['tic']==ticker], axis=0))
-    
+    #try:
     hist_np = np.concatenate(hist, axis=0)
+    #except: pass
     dating = hist_np[0][:,0]
     #for i in range(hist_np.shape[1]-250):
     #    print(hist_np[0][i])
@@ -139,7 +141,6 @@ def get_history(abbreviation, state_day_length, START_DATE, END_DATE):
     
     return target_history, dating
 
-
-
+    
 
 

@@ -9,9 +9,13 @@ from .yahoodownloader import get_history
 
 def get_targets(year, Q, num):
     start_year = 2018
-    with open('./utils/company_buy.pickle', 'rb') as f:
+    with open('./utils/company_buy_0313.pickle', 'rb') as f:
         all_target = pickle.load(f)
-    
+        for t in all_target:
+            if 'PYPL' in t:
+                t.remove('PYPL')
+            if 'KHC' in t:
+                t.remove('KHC')
     return all_target[year - start_year + Q - 1][:num]
 
 
