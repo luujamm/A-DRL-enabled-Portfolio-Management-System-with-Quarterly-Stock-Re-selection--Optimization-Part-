@@ -10,8 +10,7 @@ from utils.yahoodownloader import YahooDownloader
 
 STATE_LENGTH = 40
 
-
-quater_dates = {
+'''quater_dates = {
     '2018_Q1': ['2014-10-01', '2017-10-02', '2018-01-02', '2018-04-02'],
     '2018_Q2': ['2015-01-02', '2018-01-02', '2018-04-02', '2018-07-02'],
     '2018_Q3': ['2015-04-02', '2018-04-02', '2018-07-02', '2018-10-01'],
@@ -28,7 +27,7 @@ quater_dates = {
     '2021_Q2': ['2018-01-02', '2021-01-04', '2021-04-05', '2021-07-06'],
     '2021_Q3': ['2018-04-02', '2021-04-05', '2021-07-06', '2021-10-04'],
     '2021_Q4': ['2018-07-02', '2021-07-06', '2021-10-04', '2022-01-01']
-}
+}'''
 
 
 def download_and_save(dir, year, Q, start, end, target_stocks, status):
@@ -39,6 +38,14 @@ def download_and_save(dir, year, Q, start, end, target_stocks, status):
 
     df_hist = df[['date','open','high','low','close','volume','tic']]
     df_hist.to_csv(dir + '/' + status + '/' + str(year) + 'Q' + str(Q) + '.csv')
+    if status == 'test' or 'val':
+        df = YahooDownloader(STATE_LENGTH,
+                        start_date = start,
+                        end_date = end,
+                        ticker_list = ['^GSPC', '^OEX']).fetch_data()
+        df_hist = df[['date','open','high','low','close','volume','tic']]
+        df_hist.to_csv(dir + '/' + status + '/' + str(year) + 'Q' + str(Q) + '_bench.csv')
+
 
 def create_dataset():
     date = time.strftime('%Y-%m-%d', time.localtime())
@@ -49,26 +56,23 @@ def create_dataset():
         os.mkdir(dir + '/train')
         os.mkdir(dir + '/val')
         os.mkdir(dir + '/test')
-    years = [2018, 2019, 2020, 2021] 
-    quarters = [1, 2, 3, 4]
+    years, quarters = get_years_and_quarters()
     tu_start = '2014-01-05'
     
-
     for year in years:
         for Q in quarters:      
             print('Creating {}Q{}'.format(year, Q))      
             key = str(year) + '_Q' + str(Q)
-            train_start, train_end, val_end, test_end = (date for date in quater_dates[key])
+            quarter_dates = get_quarter_dates()
+            train_start, train_end, val_end, test_end = (date for date in quarter_dates[key])
             target_stocks = get_targets(year=year, Q=Q, num=20)
-            print('tu')
+
             download_and_save(dir, year, Q, tu_start, train_end, target_stocks, 'tu')
-            print('train')
             download_and_save(dir, year, Q, train_start, train_end, target_stocks, 'train')
-            print('val')
             download_and_save(dir, year, Q, train_end, val_end, target_stocks, 'val')
-            print('test')
             download_and_save(dir, year, Q, val_end, test_end, target_stocks, 'test')
             print('Done')
+
 
 if __name__ == '__main__':
     create_dataset()

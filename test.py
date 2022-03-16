@@ -5,7 +5,7 @@ import csv
 
 from environment.portfolio_new import PortfolioEnv
 from utils.data import *
-from utils.yahoodownloader import get_history
+from utils.yahoodownloader import get_data
 from utils.draw import draw_test_figs, show_test_results, show_val_results
 from utils.evaluation import evaluation_metrics
 from utils.recorder import Recorder
@@ -107,15 +107,16 @@ def policy_test(args, agent, ae, target_stocks, test_dir, year=None, Q=None):
     print('Start Testing')
     test_recorder = Recorder()
     test_start_date, test_end_date = define_dates(args, year, Q)
-    test_history, test_dating = get_history(target_stocks, args.state_length, test_start_date, test_end_date) 
+    #test_history, test_dating = get_history(target_stocks, args.state_length, test_start_date, test_end_date) 
+    test_history, test_dating = get_data(target_stocks, year, Q, 'test') 
     
 
     start_idx = np.argwhere(test_dating == test_start_date)[0][0] + 1
-    benchmarks = get_history(['^GSPC', '^OEX'], args.state_length, 
-                                test_start_date, test_end_date)[0][:, start_idx:, :] # S&P 500, S&P 100
-    
-    tu_his, _ = get_history(target_stocks, args.state_length, '2014-01-05', test_start_date) 
-    
+    #benchmarks = get_history(['^GSPC', '^OEX'], args.state_length, 
+    #                            test_start_date, test_end_date)[0][:, start_idx:, :] # S&P 500, S&P 100
+    benchmarks = get_data(['^GSPC', '^OEX'], year, Q, 'test', bench=True)[0][:, start_idx:, :]
+    #tu_his, _ = get_history(target_stocks, args.state_length, '2014-01-05', test_start_date) 
+    tu_his, _ = get_data(target_stocks, year, Q, 'tu')
     test_recorder.benchmarks.append(benchmarks)
     print('=' * 120, '\nStart date: ' + test_start_date)
 

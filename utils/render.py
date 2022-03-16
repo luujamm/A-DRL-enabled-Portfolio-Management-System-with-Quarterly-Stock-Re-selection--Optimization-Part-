@@ -4,7 +4,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from path import test_path
-
+from data import get_years_and_quarters
 def load_value(dates, values, file):
     value = np.array(pickle.load(file))
     
@@ -15,8 +15,7 @@ def load_value(dates, values, file):
 def render():
     test_dir = test_path()
 
-    years = [2018, 2019, 2020, 2021]
-    quarters = [1, 2, 3, 4]
+    years, quaters = get_years_and_quarters()
 
     dates, ptfls, ews, sp500s, sp100s = [], [], [], [], []
 
