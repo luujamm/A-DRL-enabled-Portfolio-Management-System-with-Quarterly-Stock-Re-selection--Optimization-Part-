@@ -1,25 +1,12 @@
-"""
-Contains a set of utility function to process data
-"""
-
 import numpy as np
 import pickle
-from .yahoodownloader import get_history
 
 
-def get_targets(year, Q, num):
-    start_year = 2018
-    with open('./utils/company_buy_0313.pickle', 'rb') as f:
-        all_target = pickle.load(f)
-        for t in all_target:
-            if 'PYPL' in t:
-                t.remove('PYPL')
-            if 'KHC' in t:
-                t.remove('KHC')
-    return all_target[year - start_year + Q - 1][:num]
+YEARS = [2018, 2019, 2020, 2021]
 
+QUARTERS = [1, 2, 3, 4]
 
-quater_dates = {
+QUARTER_DATES = {
     '2018_Q1': ['2014-10-01', '2017-10-02', '2018-01-02', '2018-04-02'],
     '2018_Q2': ['2015-01-02', '2018-01-02', '2018-04-02', '2018-07-02'],
     '2018_Q3': ['2015-04-02', '2018-04-02', '2018-07-02', '2018-10-01'],
@@ -39,20 +26,25 @@ quater_dates = {
 }
 
 
-
+def get_targets(year, Q, num):
+    start_year = 2018
+    with open('./utils/company_buy_0313.pickle', 'rb') as f:
+        all_target = pickle.load(f)
+        for t in all_target:
+            if 'PYPL' in t:
+                t.remove('PYPL')
+            if 'KHC' in t:
+                t.remove('KHC')
+    return all_target[year - start_year + Q - 1][:num]
 
 
 def define_dates(args, year=None, Q=None):
     pretrain_start = '2002-01-01'
     turbulance_start = '2014-01-05'
-    # 有往前多撈了2*state_day_length天的data
     if args.case == 3:
-        key = str(year) + '_Q' + str(Q)
-        #train_start = '2015-01-05'
-        #train_end, val_end, test_end = '2017-07-21', '2018-01-04', '2018-06-09' 
-        #train_start = '2015-04-05'
-        #train_end, val_end, test_end = '2017-10-20', '2018-04-02', '2018-08-09' 
-        train_start, train_end, val_end, test_end = (date for date in quater_dates[key])
+        key = str(year) + '_Q' + str(Q) 
+        quarter_dates = get_quarter_dates()
+        train_start, train_end, val_end, test_end = (date for date in quarter_dates[key])
     elif args.case == 4: #DP test4
         train_start = '2002-01-02'
         train_end, val_end, test_end = '2017-05-19', '2018-03-19', '2018-07-27'#'2021-01-12'
@@ -71,25 +63,6 @@ def define_dates(args, year=None, Q=None):
         return train_start, train_end
     else:
         return pretrain_start, turbulance_start, train_start, train_end, val_end
-
-
-'''def get_train_val_history(args, target_stocks, year=None, Q=None):
-    pretrain_start, turbulance_start, train_start, train_end, val_end = define_dates(args, year, Q)
-    history, dating = get_history(target_stocks, args.state_length, 
-                                              turbulance_start, val_end) 
-    
-    shift = np.argwhere(dating==turbulance_start)[0][0]
-    print(shift)
-    train_start_idx = np.argwhere(dating==train_start)[0][0]
-    train_end_idx = np.argwhere(dating==train_end)[0][0]
-    turbulance_history = history[:, :train_end_idx+1, :]
-    print(turbulance_history.shape)
-    train_history, train_dating = history[:, train_start_idx-shift: train_end_idx+1, :], dating[train_start_idx-shift: train_end_idx+1]
-    print(train_history.shape, train_dating[0], train_dating[-1])
-    val_history, val_dating = history[:, train_end_idx-shift:, :], dating[train_end_idx-shift:]
-    print(val_history.shape, val_dating[0], val_dating[-1])'''
-    
-    
 
     
 def normalize(x):
@@ -165,4 +138,11 @@ def cash_state(state):
     for i in range(cash.shape[1]-1):
         cash[:, i+1:, :] *= rate
     return cash
-    
+
+
+def get_quarter_dates():
+    return QUARTER_DATES
+
+
+def get_years_and_quarters():
+    return YEARS, QUARTERS

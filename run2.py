@@ -8,8 +8,6 @@ from utils.define_args import define_args
 from utils.data import get_targets
 from utils.create_repository import create_path
 
-#AGENT_NAMES = ['PPO_res', 'PPO_tcn']
-#agent_name = AGENT_NAMES[0]
 
 def targets(year=None, Q=None, num=None):
     if year == None:
@@ -48,11 +46,9 @@ def main():
         Q = 1
         target_stocks, action_dim = targets(year=year, Q=Q, num=20)
         agent = Agent(args, action_dim, agent_name)
-        test_dir = './save_/2022-03-15/094457'
-        #test_dir = './save_/vs_deep_breath'
+        test_dir = './save_/2022-03-16/164909'
         if args.case == 3:
             test_dir += ('/' + str(year) + 'Q' + str(Q))
-        #test_dir = './save_/2022-01-23/162414'
         policy_test(args, agent, ae, target_stocks, test_dir, year, Q)
 
     
