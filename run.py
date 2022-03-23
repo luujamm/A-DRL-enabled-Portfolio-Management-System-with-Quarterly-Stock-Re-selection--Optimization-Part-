@@ -7,7 +7,7 @@ from path import test_path
 from model.PPOagent import Agent
 from model.autoencoder import Autoencoder
 from utils.define_args import define_args
-from utils.data import get_targets
+from utils.data import *
 from utils.create_repository import create_path
 
 
@@ -30,8 +30,7 @@ def targets(year=None, Q=None, num=None):
     
 def main():
     args = define_args()
-    years = [2018, 2019, 2020, 2021] 
-    quaters = [1, 2, 3, 4]
+    years, quaters = get_years_and_quarters()
     agent_name = args.algo + '_' + args.model
     
     ae = Autoencoder(args)  

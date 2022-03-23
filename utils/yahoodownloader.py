@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import datetime
 import yfinance as yf
+import csv
 # from utils.data_new import date_to_index, index_to_date
 
 
@@ -106,7 +107,7 @@ class YahooDownloader:
         return df
 
 
-def get_history(abbreviation, state_day_length, START_DATE, END_DATE):
+'''def get_history(abbreviation, state_day_length, START_DATE, END_DATE):
     target_stocks = abbreviation
     df = YahooDownloader(state_day_length,
                          start_date = START_DATE,
@@ -121,8 +122,9 @@ def get_history(abbreviation, state_day_length, START_DATE, END_DATE):
     
     for ticker in target_stocks:
         hist.append(np.expand_dims(df_hist[df_hist['tic']==ticker], axis=0))
-    
+    #try:
     hist_np = np.concatenate(hist, axis=0)
+    #except: pass
     dating = hist_np[0][:,0]
     #for i in range(hist_np.shape[1]-250):
     #    print(hist_np[0][i])
@@ -137,9 +139,39 @@ def get_history(abbreviation, state_day_length, START_DATE, END_DATE):
     for i, stock in enumerate(target_stocks):
         target_history[i] = history[target_stocks.index(stock), :num_training_time, :]
     
+    return target_history, dating'''
+
+
+def get_data(target_stocks, year, Q, status, bench=False):
+    data_repo = '2022-03-22'
+    path = './data/' + data_repo + '/' + status + '/' + str(year) + 'Q' + str(Q)
+    if bench:
+        path += '_bench.csv'
+    else:
+        path += '.csv'
+    df = pd.read_csv(path)
+    df_hist = df[['date','open','high','low','close','volume','tic']]
+
+    hist =[]
+    
+    for ticker in target_stocks:
+        hist.append(np.expand_dims(df_hist[df_hist['tic']==ticker], axis=0))
+
+    hist_np = np.concatenate(hist, axis=0)
+
+    dating = hist_np[0][:,0]
+    
+    history = hist_np[:,:,1:5]
+    num_training_time = len(dating)
+    
+    # get target history
+    target_history = np.empty(shape=(len(target_stocks), num_training_time, history.shape[2]))
+    
+    for i, stock in enumerate(target_stocks):
+        target_history[i] = history[target_stocks.index(stock), :num_training_time, :]
+    
     return target_history, dating
 
-
-
+    
 
 

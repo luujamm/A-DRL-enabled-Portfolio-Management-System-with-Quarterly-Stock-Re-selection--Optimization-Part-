@@ -23,7 +23,7 @@ def define_args():
     parser.add_argument('--trading_cost', default=0.002, type=float)
     parser.add_argument('--state_length', default=40, type=int)
     parser.add_argument('--lam1', default=0.0, type=float) 
-    parser.add_argument('--lam2', default=0.3, type=float)
+    parser.add_argument('--lam2', default=0.1, type=float)
     parser.add_argument('--lam3', default=0.0, type=float)
     
     parser.add_argument('-l', '--train_period_length', default=652, type=int)
@@ -33,7 +33,7 @@ def define_args():
     # model
     parser.add_argument('-b', '--batch_size', default=64, type=int)
     parser.add_argument('--lrv', default=1e-4, type=float)
-    parser.add_argument('--lra', default=3e-4, type=float)
+    parser.add_argument('--lra', default=0.0015, type=float)
     parser.add_argument('--tau', default=1, type=float)
     parser.add_argument('-p', '--dropout_rate', default=0, type=float)
     
@@ -42,7 +42,7 @@ def define_args():
     parser.add_argument('--action_std_train', default=0.001, type=float)
     parser.add_argument('--action_std_decay_rate', default=0.99, type=float)
     parser.add_argument('--action_std_test', default=1e-10, type=float)
-    parser.add_argument('-s', '--trajectory_sample_times', default=8, type=int)
+    parser.add_argument('-s', '--trajectory_sample_times', default=16, type=int)
     parser.add_argument('-k', '--K_epochs', default=10, type=int)
     parser.add_argument('--eps_clip', default=0.2, type=float)
     parser.add_argument('--dist_entropy_coef', default=1e-2, type=float)

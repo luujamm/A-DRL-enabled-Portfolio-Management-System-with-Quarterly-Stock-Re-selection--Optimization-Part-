@@ -8,8 +8,6 @@ from utils.define_args import define_args
 from utils.data import get_targets
 from utils.create_repository import create_path
 
-#AGENT_NAMES = ['PPO_res', 'PPO_tcn']
-#agent_name = AGENT_NAMES[0]
 
 def targets(year=None, Q=None, num=None):
     if year == None:
@@ -37,22 +35,20 @@ def main():
     if not args.test and not args.backtest: 
         path = create_path(args)
         
-        year = None
-        Q = 1
+        year = 2018
+        Q = 4
         target_stocks, action_dim = targets(year=year, Q=Q, num=20)
         agent = Agent(args, action_dim, agent_name)
         policy_learn(args, agent, ae, target_stocks, path, year, Q)  
     # test   
     else: 
-        year = None
-        Q = 1
+        year = 2019
+        Q = 4
         target_stocks, action_dim = targets(year=year, Q=Q, num=20)
         agent = Agent(args, action_dim, agent_name)
-        test_dir = './save_/2022-02-27/124145'
-        #test_dir = './save_/vs_deep_breath'
+        test_dir = './save_/2022-03-18/102422'
         if args.case == 3:
             test_dir += ('/' + str(year) + 'Q' + str(Q))
-        #test_dir = './save_/2022-01-23/162414'
         policy_test(args, agent, ae, target_stocks, test_dir, year, Q)
 
     

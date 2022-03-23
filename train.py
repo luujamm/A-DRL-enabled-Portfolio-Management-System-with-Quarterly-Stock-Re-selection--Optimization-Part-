@@ -5,7 +5,7 @@ import time
 from test import test
 from environment.portfolio_new import PortfolioEnv
 from utils.data import *
-from utils.yahoodownloader import get_history
+from utils.yahoodownloader import get_data
 from utils.create_repository import create_path, create_q_path
 from utils.abstract import write_abstract
 from utils.draw import draw_train_summary
@@ -127,16 +127,19 @@ def policy_learn(args, agent, ae, target_stocks, path, year, Q):
         ae.load(args.pretrain_ae)
     
     
-    train_history, train_dating = get_history(target_stocks, args.state_length, 
-                                              train_start_date, train_end_date) 
-    val_history, val_dating = get_history(target_stocks, args.state_length, 
-                                              train_end_date, val_end_date)
-    
-    tu_his, _ = get_history(target_stocks, args.state_length, tu_start, train_end_date) 
+    #train_history, train_dating = get_history(target_stocks, args.state_length, 
+    #                                          train_start_date, train_end_date) 
+    train_history, train_dating = get_data(target_stocks, year, Q, 'train')
+    #val_history, val_dating = get_history(target_stocks, args.state_length, 
+    #                                          train_end_date, val_end_date)
+    val_history, val_dating = get_data(target_stocks, year, Q, 'val')
+    #tu_his, _ = get_history(target_stocks, args.state_length, tu_start, train_end_date) 
+    tu_his = get_data(target_stocks, year, Q, 'tu')[0]
     #'2014-01-05'
     start_idx = np.argwhere(val_dating == train_end_date)[0][0] + 1
-    benchmarks = get_history(['^GSPC', '^OEX'], args.state_length, 
-                            train_end_date, val_end_date)[0][:, start_idx:, :] # S&P 500, S&P 100
+    #benchmarks = get_history(['^GSPC', '^OEX'], args.state_length, 
+    #                        train_end_date, val_end_date)[0][:, start_idx:, :] # S&P 500, S&P 100
+    benchmarks = get_data(['^GSPC', '^OEX'], year, Q, 'val', bench=True)[0]
     val_recorder.benchmarks.append(benchmarks)
     quarter = str(year) + 'Q' + str(Q)
     print(quarter)
