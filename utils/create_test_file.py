@@ -1,12 +1,12 @@
 import os
 from path import test_path
-from data import get_years_and_quarters
+from .data import get_years_and_quarters
 
 #dir = './save_/2022-02-26/003436/'
 def create_testfile():
     test_dir = test_path()
 
-    years, quaters = get_years_and_quarters()
+    years, quarters = get_years_and_quarters()
     case = 3
     testfile = test_dir + 'test.txt'
     if os.path.exists(testfile):

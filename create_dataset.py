@@ -8,7 +8,7 @@ import time
 from utils.data import *
 from utils.yahoodownloader import YahooDownloader
 
-STATE_LENGTH = 40
+STATE_LENGTH = 100
 
 '''quater_dates = {
     '2018_Q1': ['2014-10-01', '2017-10-02', '2018-01-02', '2018-04-02'],
