@@ -166,9 +166,7 @@ class PPO:
         self.tau = args.tau
         self.policy_opt = optim.Adam([
             {'params': self.policy.actor.parameters(), 'lr': self.args.lra},
-            {'params': self.policy.critic.parameters()},
-        ],
-            lr=self.args.lra)#, weight_decay=0.01)
+            {'params': self.policy.critic.parameters(), 'lr': self.args.lrv}])#, weight_decay=0.01)
         self.policy_old = ActorCritic(
             args, self.day_length, self.action_dim, agent_name).to(self.device)
         self.policy_old.load_state_dict(self.policy.state_dict())
