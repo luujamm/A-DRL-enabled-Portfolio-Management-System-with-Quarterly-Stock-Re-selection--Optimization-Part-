@@ -4,7 +4,7 @@ import os
 from train import policy_learn
 from test import policy_test
 from path import test_path
-from model.PPOagent import Agent
+from model.agent import Agent
 from model.autoencoder import Autoencoder
 from utils.define_args import define_args
 from utils.data import *

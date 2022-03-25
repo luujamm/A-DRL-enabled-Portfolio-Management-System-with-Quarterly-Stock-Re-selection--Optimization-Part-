@@ -50,6 +50,7 @@ class RolloutBuffer:
         self.logprobs = []
         self.rewards = []
         self.is_terminals = []
+        self.ys = []
 
     def clear(self):
         del self.actions[:]
@@ -60,6 +61,7 @@ class RolloutBuffer:
         del self.logprobs[:]
         del self.rewards[:]
         del self.is_terminals[:]
+        del self.ys[:]
 
     def __len__(self):
         return len(self.actions)
@@ -125,11 +127,11 @@ class ActorCritic(nn.Module):
         self.output_dim = 1
         self.relu = nn.ReLU()
         
-        if args.algo == 'PPO':
+        if self.args.algo == 'PPO':
             self.CNN = create_model(args, day_length, action_dim)
             self.critic = FNN(args, action_dim, self.hidden_dim1,
                               self.hidden_dim2, self.output_dim)
-        elif args.algo == 'DDPG':
+        elif self.args.algo == 'DDPG':
             self.actor = create_model(args, day_length, action_dim)
             self.critic = create_model(args, day_length, action_dim)
             self.critic_fc = CriticFC(action_dim, self.hidden_dim2, self.output_dim)
@@ -146,8 +148,25 @@ class ActorCritic(nn.Module):
             value = self.critic_fc(s, weight)
             
         action = self.softmax(x)
-           
+        
         return value, action
+
+class PolicyBased(nn.Module):
+    def __init__(self, args, day_length, action_dim, agent_name):
+        super(PolicyBased, self).__init__()
+        self.args = args
+        self.relu = nn.ReLU()
+    
+        if self.args.algo == 'DPG':
+            self.actor = create_model(args, day_length, action_dim)
+        
+        self.softmax = nn.Softmax(1)
+
+    def forward(self, state, weight):
+        x = self.actor(state, weight)
+        action = self.softmax(x)     
+        return action 
+
 
 class PPO:
     def __init__(self, args, action_dim, agent_name):
@@ -164,6 +183,8 @@ class PPO:
         self.dist_entropy_coef = args.dist_entropy_coef
         self.batch_size = args.batch_size
         self.tau = args.tau
+        self.policy = ActorCritic(
+            args, self.day_length, self.action_dim, agent_name).to(self.device)
         self.policy_opt = optim.Adam([
             {'params': self.policy.actor.parameters(), 'lr': self.args.lra},
             {'params': self.policy.critic.parameters()},
@@ -292,6 +313,59 @@ class PPO:
         model = torch.load(model_path)
         self.policy.load_state_dict(model)
         self.policy_old.load_state_dict(model)
+
+
+class DPG:
+    def __init__(self, args, action_dim, agent_name):
+        self.args = args
+        self.device = args.device
+        self.action_dim = action_dim
+        self.day_length = args.state_length
+        self.gamma = args.gamma
+        self.batch_size = args.batch_size
+        self.tau = args.tau
+        self.policy = PolicyBased(args, self.day_length, self.action_dim, agent_name).to(self.device)
+        self.policy_opt = optim.Adam([
+            {'params': self.policy.parameters(), 'lr': self.args.lra},
+            ])
+        self.relu = nn.ReLU()
+        self.step = torch.FloatTensor([STEP]).to(self.device)
+        self.buffer = RolloutBuffer()
+
+    def choose_action(self, state, weight):
+        with torch.no_grad():
+            state = torch.FloatTensor(state[np.newaxis, :]).to(self.device)
+            weight = torch.FloatTensor(weight[np.newaxis, :]).to(self.device)     
+            action = self.policy(state, weight)
+            use_action = action.cpu().numpy().flatten() + EPS
+            return use_action, 0, 0, 0
+
+    def evaluate(self, state, weight):       
+        action = self.policy(state, weight)
+        return action
+    
+    def update(self):
+        states = torch.squeeze(torch.stack(
+            self.buffer.states, dim=0)).detach().to(self.device)
+        weights = torch.squeeze(torch.stack(
+            self.buffer.weights, dim=0)).detach().to(self.device)
+        ys = torch.squeeze(torch.stack(
+            self.buffer.ys, dim=0)).detach().to(self.device)
+                
+        action = self.evaluate(states, weights)
+        loss = -torch.log(torch.sum(action * ys))
+        self.policy_opt.zero_grad()
+        loss.mean().backward()
+        self.policy_opt.step()
+        self.buffer.clear()  
+            
+    def save(self, model_path):
+        torch.save(self.policy.state_dict(), model_path)
+
+    def load(self, model_path):
+        model = torch.load(model_path)
+        self.policy.load_state_dict(model)
+    
 
 
 class DDPG:
@@ -423,10 +497,13 @@ class Agent(nn.Module):
         super(Agent, self).__init__()
         setup_seed(args.seed)
         self.args = args
-        if args.algo == 'PPO':
+        if self.args.algo == 'PPO':
             self.algo = PPO(args, action_dim, agent_name)
-        elif args.algo == 'DDPG':
+        elif self.args.algo == 'DPG':
+            self.algo = DPG(args, action_dim, agent_name)
+        elif self.args.algo == 'DDPG':
             self.algo = DDPG(args, action_dim, agent_name)
+        
         
         #recorder
         self.train_reward = []
@@ -440,7 +517,10 @@ class Agent(nn.Module):
     def setup_seed_(self, seed):
         setup_seed(seed)
 
-    def append(self, state, state_, next_value, weight, action, log_prob, reward, done):
+    def choose_action(self, state, weight):
+        return self.algo.choose_action(state, weight)
+
+    def append(self, state, state_, next_value, weight, action, log_prob, reward, done, y):
         self.algo.buffer.states.append(torch.tensor(state, dtype=torch.float))
         self.algo.buffer.states_.append(torch.tensor(state_, dtype=torch.float))
         self.algo.buffer.next_values.append(torch.tensor(next_value, dtype=torch.float))
@@ -449,6 +529,7 @@ class Agent(nn.Module):
         self.algo.buffer.logprobs.append(torch.tensor(log_prob, dtype=torch.float))
         self.algo.buffer.rewards.append(reward)
         self.algo.buffer.is_terminals.append(int(done))
+        self.algo.buffer.ys.append(torch.tensor(y, dtype=torch.float))
         
     def update(self):
         self.algo.update()

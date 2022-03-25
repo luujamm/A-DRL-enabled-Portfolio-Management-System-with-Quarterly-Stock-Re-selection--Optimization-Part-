@@ -1,6 +1,7 @@
 import itertools
 import numpy as np
 import time
+import random
 
 from test import test
 from environment.portfolio_new import PortfolioEnv
@@ -13,7 +14,6 @@ from utils.recorder import Recorder
 from utils.evaluation import risk_free_return
 
 
-
 SEED_STEP = 42
 EPS = 1e-8
 
@@ -22,7 +22,7 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
     agent.train()
     
     action_dim = len(target_stocks) + 1
-    sample_times = args.trajectory_sample_times
+    sample_times = args.trajectory_sample_times if args.algo == 'PPO' else 1
     rfr = risk_free_return()
     
     iteration_start_time = time.time()
@@ -37,13 +37,14 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
     else: 
         index_bias = 21
     max_period = len(train_dating) - args.state_length - index_bias - 1
-    args.train_period_length = max_period
-    #assert args.train_period_length <= max_period, 'Max period should be {}'.format(max_period) 
+   
+    args.train_period_length = max_period 
     
     for epi_itr in reversed(range(max_period - args.train_period_length + 1)): 
         model_fn = path + '/agent_test{}_iter{}.pth'.format(args.case, iteration)
         epi_end_idx = len(train_dating) - epi_itr - index_bias
-        agent.std = agent.std_train
+        if args.algo == 'PPO':
+            agent.std = agent.std_train
         env = PortfolioEnv(args, train_history, train_data, action_dim, 
                                train_dating, train_history, steps=args.train_period_length,
                            sample_start_date=train_start_date)
@@ -71,17 +72,16 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
                     train_correct += 1 / args.train_period_length / sample_times
 
                 state_ = transform_state(args, ae, state_, next_observation)
-                next_value = agent.choose_action(state_, new_weights)[-2].item()
+                if args.algo == 'PPO':
+                    next_value = agent.choose_action(state_, new_weights)[-2].item()
+                else: next_value = 0
                                 
                 daily_return.append(trade_info["rate_of_return"])
+
+                if args.algo == 'DPG' and agent.algo.buffer.__len__() == args.batch_size:
+                    done = 1
                 # store transition
-                if args.lam3 > 0:
-                    if len(daily_return) > 9:
-                        dr = daily_return[-10:]
-                        reward += (np.mean(dr) -rfr + EPS) / (np.std(dr) + EPS) * args.lam3
-                        agent.append(state, next_value, current_weights, action, action_log_prob, reward, done)
-                else:
-                    agent.append(state, next_value, current_weights, action, action_log_prob, reward, done)
+                agent.append(state, state_, next_value, current_weights, action, action_log_prob, reward, done, trade_info['return'])
                     
                 state = state_
                 current_weights = new_weights
@@ -116,7 +116,6 @@ def policy_learn(args, agent, ae, target_stocks, path, year, Q):
     train_recorder = Recorder()
     val_recorder = Recorder()
     pretrain_start_date, tu_start, train_start_date, train_end_date, val_end_date = define_dates(args, year, Q)
-
     
     if args.pretrain:
         pretrain_history, pretrain_dating = get_history(target_stocks, args.state_length, 
@@ -130,6 +129,9 @@ def policy_learn(args, agent, ae, target_stocks, path, year, Q):
     #train_history, train_dating = get_history(target_stocks, args.state_length, 
     #                                          train_start_date, train_end_date) 
     train_history, train_dating = get_data(target_stocks, year, Q, 'train')
+    if args.algo == 'DPG':
+        start_idx = date_to_index(train_start_date, train_dating)
+        train_start_date = index_to_date(start_idx + random.randint(0, len(train_dating) - start_idx - args.batch_size), train_dating)
     #val_history, val_dating = get_history(target_stocks, args.state_length, 
     #                                          train_end_date, val_end_date)
     val_history, val_dating = get_data(target_stocks, year, Q, 'val')

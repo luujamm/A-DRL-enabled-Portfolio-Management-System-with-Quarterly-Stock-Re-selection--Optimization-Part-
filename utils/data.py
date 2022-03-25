@@ -148,6 +148,15 @@ def get_years_and_quarters():
     return YEARS, QUARTERS
 
 
+def index_to_date(index, dating):
+    return dating[index]    
+
+
+def date_to_index(date_string, dating):
+    date_idx = np.where(dating == date_string)
+    return date_idx[0][0]  
+
+
 
 #data = company_buy.pickle
 '''old_dates = quater_dates = {

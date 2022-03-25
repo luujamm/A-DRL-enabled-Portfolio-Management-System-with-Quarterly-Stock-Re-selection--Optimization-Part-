@@ -17,7 +17,8 @@ TURBULENCE_THRESHOLD = 140
 def test(args, agent, ae, recorder, target_stocks, test_history, 
          test_dating, sample_start_date, iteration, tu_his, test_dir=None, model_fn=None, path=None):
     agent.eval()
-    agent.std = args.action_std_test
+    if args.algo == 'PPO':
+        agent.std = args.action_std_test
     action_dim = len(target_stocks) + 1
     seeds = (args.seed + i for i in range(TEST_NUM)) 
     tu_list = []
