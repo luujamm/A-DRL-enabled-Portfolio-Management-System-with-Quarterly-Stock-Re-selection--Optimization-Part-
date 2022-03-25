@@ -241,7 +241,7 @@ class PortfolioSim(object):
             "reward": reward,
             "log_return": r1,
             "portfolio_value": p1,
-            "return": y1,
+            "return": y0 * y1,
             "rate_of_return": rho1,
             "cost": p0 * mu1 * np.dot(y1, w1) ,
         }
