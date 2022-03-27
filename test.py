@@ -14,7 +14,7 @@ TEST_NUM = 5
 TURBULENCE_THRESHOLD = 140
 
 
-def test(args, agent, ae, recorder, target_stocks, test_history, 
+def test(args, agent, recorder, target_stocks, test_history, 
          test_dating, sample_start_date, iteration, tu_his, test_dir=None, model_fn=None, path=None):
     agent.eval()
     if args.algo == 'PPO':
@@ -49,7 +49,7 @@ def test(args, agent, ae, recorder, target_stocks, test_history,
         state, observation, _ = env.reset()
         eqwt_env.reset()
         
-        state = transform_state(args, ae, state, observation)
+        state = generate_state(observation)
         current_weights = init_action.copy()
         eqwt_action = get_init_action(action_dim, ew=True)
         trade = True
@@ -63,7 +63,7 @@ def test(args, agent, ae, recorder, target_stocks, test_history,
             eqwt_action, _, _, _, _, eqwt_trade_info, _ = eqwt_env.step(eqwt_action, eqwt_action)
             
             trajectory_reward += reward
-            state_ = transform_state(args, ae, state_, next_observation)
+            state_ = generate_state(next_observation)
             state = state_
             recorder.test_record(use_action, trade_info, eqwt_trade_info)
             

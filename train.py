@@ -18,7 +18,7 @@ SEED_STEP = 42
 EPS = 1e-8
 
 
-def train(args, agent, ae, recorder, target_stocks, train_history, train_dating, train_start_date, iteration, path):
+def train(args, agent, recorder, target_stocks, train_history, train_dating, train_start_date, iteration, path):
     agent.train()
     
     action_dim = len(target_stocks) + 1
@@ -52,10 +52,8 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
         for st in range(sample_times):
             trajectory_reward = 0
             state, observation, _ = env.reset()
-            #print(state[0])
-            #exit()
             
-            state = transform_state(args, ae, state, observation)
+            state = generate_state(observation)
             
             current_weights = get_init_action(action_dim, random=True)
             daily_return = []
@@ -71,7 +69,9 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
                 if reward > 0:
                     train_correct += 1 / args.train_period_length / sample_times
 
-                state_ = transform_state(args, ae, state_, next_observation)
+                
+                state_ = generate_state(next_observation)
+
                 if args.algo == 'PPO':
                     next_value = agent.choose_action(state_, new_weights)[-2].item()
                 else: next_value = 0
@@ -81,7 +81,10 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
                 if args.algo == 'DPG' and agent.algo.buffer.__len__() == args.batch_size:
                     done = 1
                 # store transition
-                agent.append(state, state_, next_value, current_weights, action, action_log_prob, reward, done, trade_info['return'])
+                if args.algo == 'PPO':
+                    agent.append(state, next_value, current_weights, action, action_log_prob, reward, done)
+                else: #DPG
+                    agent.append(state, state_, next_value, current_weights, action, action_log_prob, reward, done, trade_info['return'])
                     
                 state = state_
                 current_weights = new_weights
@@ -108,7 +111,7 @@ def train(args, agent, ae, recorder, target_stocks, train_history, train_dating,
     return model_fn
 
 
-def policy_learn(args, agent, ae, target_stocks, path, year, Q):
+def policy_learn(args, agent, target_stocks, path, year, Q):
     print('Start Training')
     last_use_time = 0
     start_time = time.time()
@@ -141,7 +144,7 @@ def policy_learn(args, agent, ae, target_stocks, path, year, Q):
     start_idx = np.argwhere(val_dating == train_end_date)[0][0] + 1
     #benchmarks = get_history(['^GSPC', '^OEX'], args.state_length, 
     #                        train_end_date, val_end_date)[0][:, start_idx:, :] # S&P 500, S&P 100
-    benchmarks = get_data(['^GSPC', '^OEX'], year, Q, 'val', bench=True)[0]
+    benchmarks = get_data(['^GSPC', '^OEX'], year, Q, 'val', bench=True)[0] # S&P 500, S&P 100
     val_recorder.benchmarks.append(benchmarks)
     quarter = str(year) + 'Q' + str(Q)
     print(quarter)
@@ -152,8 +155,8 @@ def policy_learn(args, agent, ae, target_stocks, path, year, Q):
         agent.setup_seed_(seed)
         train_recorder.clear()
         val_recorder.clear()
-        model_fn = train(args, agent, ae, train_recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path)   
-        test(args, agent, ae, val_recorder, target_stocks, val_history,  val_dating, train_end_date,
+        model_fn = train(args, agent, train_recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path)   
+        test(args, agent, val_recorder, target_stocks, val_history,  val_dating, train_end_date,
              it+1, tu_his, model_fn=model_fn, path=path)
         use_time = time.time() - start_time
         remain_time = (use_time - last_use_time) * (args.train_iter - it - 1)

@@ -2,6 +2,17 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+
+def create_model(args, day_length, action_dim):
+    if args.model == 'tcn':
+        model = CNN_tcn(args, day_length, action_dim)
+    elif args.model == 'EIIE':
+        model = CNN_EIIE(args, day_length, action_dim)
+    elif args.model == 'res':
+        model = CNN_res(args, day_length, action_dim)
+    return model
+
+
 class CNN_res(nn.Module):
     def __init__(self, args, day_length, action_dim):
         super(CNN_res, self).__init__()

@@ -142,7 +142,7 @@ class DataGenerator(object):
         # indicates how market total investment changes. Normalize could be critical here
         self.step += 1  
         state = self.state_data[:, self.step:self.step + self.window_length, :].copy()
-        obs = self.history_data[:, self.step - 1:self.step + self.window_length, :].copy()
+        obs = self.history_data[:, self.step:self.step + self.window_length, :].copy()
         #print(self.step, self.step + self.window_length)
         # normalize obs with open price
 

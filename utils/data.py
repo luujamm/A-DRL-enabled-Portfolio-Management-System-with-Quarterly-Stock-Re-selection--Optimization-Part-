@@ -75,19 +75,16 @@ def normalize(x):
     return (x - 1) * 100
 
 
-def obs_normalizer(observation):
+def state_normalizer(state):
     """ Preprocess observation obtained by environment
     Args:
         observation: (nb_classes, window_length, num_features) or with info
     Returns: normalized
     """
+    state = state / state[:, -1:, -1:] # normalize to last close
+    state = normalize(state) # do "(x - 1)*100"
 
-    observation = observation[:, 1:, :] / observation[:, -1:, -1:] # normalize to last close
-    #observation = observation[:, 1:, :4] / observation[:, :-1, -1:] # normalize to previous close
-    
-    observation = normalize(observation) # do "(x - 1)*100"
-
-    return observation#/norm
+    return state
 
 
 def get_init_action(dim, random=False, ew=False):
@@ -115,24 +112,14 @@ def transform_data(args, history, dating):
     return history, dating, data
 
 
-def transform_state(args, ae, state, observation):
-    #cash = np.ones((1, state.shape[1], state.shape[2]))
-    cash = cash_state(state)
-    state = np.concatenate((cash, state), 0)
-    
-    
-    if args.closeae:
-        if observation.shape[1] == args.state_length:
-            observation = np.concatenate((observation[:, 1:2, :], observation), axis=1)
-        state = obs_normalizer(observation[:,:,:])  # remove cash element and normalize
-                
-    else:
-        state = ae.extract(state)
-    
+def generate_state(observation):
+    cash = cash_state(observation)
+    state = np.concatenate((cash, observation[1:, :, :]), 0)
+    state = state_normalizer(state)
     return state
 
-def cash_state(state):
-    cash = np.ones((1, state.shape[1], state.shape[2]))
+def cash_state(obs):
+    cash = np.ones((1, obs.shape[1], obs.shape[2]))
     rfr = np.array([1.01])
     rate = np.exp(np.log(rfr) / 365)
     for i in range(cash.shape[1]-1):
