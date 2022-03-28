@@ -17,11 +17,11 @@ def create_testfile():
             path = test_dir + str(year) + 'Q' + str(Q)
             
             #find = False
-            for it in range(2500, 9, -1):
+            for it in range(100, 9, -1):
                 model =  path + '/agent_test' + str(case) + '_iter' + str(it) + '.pth'
                 if os.path.exists(model):#and not find:
                     print('Testfile add ' + model)
-                    with open(test_dir + 'test.txt', 'a') as f:
+                    with open(testfile, 'a') as f:
                         f.write(str(it) + '\n')
                     break
                 

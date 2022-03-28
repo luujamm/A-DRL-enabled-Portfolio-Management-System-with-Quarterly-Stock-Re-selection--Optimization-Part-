@@ -45,6 +45,7 @@ class RolloutBuffer:
 class PPO(nn.Module):
     def __init__(self, args, action_dim):
         super(PPO, self).__init__()
+        setup_seed(args.seed)
         self.action_dim = action_dim
         self.args = args
         self.device = args.device

@@ -1,11 +1,8 @@
 import numpy as np
 import pickle
 
-
 YEARS = [2018, 2019, 2020, 2021]
-
 QUARTERS = [1, 2, 3, 4]
-
 QUARTER_DATES = {
     '2018_Q1': ['2014-10-01', '2017-10-02', '2018-01-02', '2018-04-02'],
     '2018_Q2': ['2015-01-02', '2018-01-02', '2018-04-02', '2018-07-02'],
@@ -71,7 +68,6 @@ def normalize(x):
         x: input of any shape
     Returns: normalized data
     """
-
     return (x - 1) * 100
 
 
@@ -83,7 +79,6 @@ def state_normalizer(state):
     """
     state = state / state[:, -1:, -1:] # normalize to last close
     state = normalize(state) # do "(x - 1)*100"
-
     return state
 
 
@@ -114,9 +109,10 @@ def transform_data(args, history, dating):
 
 def generate_state(observation):
     cash = cash_state(observation)
-    state = np.concatenate((cash, observation[1:, :, :]), 0)
+    state = np.concatenate((cash, observation), 0)
     state = state_normalizer(state)
     return state
+
 
 def cash_state(obs):
     cash = np.ones((1, obs.shape[1], obs.shape[2]))
