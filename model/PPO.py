@@ -62,7 +62,8 @@ class PPO(nn.Module):
         self.policy = ActorCritic(args, self.day_length, self.action_dim).to(self.device)
         self.policy_opt = optim.Adam([
             {'params': self.policy.CNN.parameters()},
-            {'params': self.policy.critic.parameters(), 'lr': self.args.lrv}],
+            {'params': self.policy.critic.parameters(), 'lr': self.args.lrv},
+            {'params': self.policy.critic_fc.parameters(), 'lr': self.args.lrv}],
             lr=self.args.lra)
         self.policy_old = ActorCritic(
             args, self.day_length, self.action_dim).to(self.device)
@@ -78,6 +79,8 @@ class PPO(nn.Module):
         self.val_value = []
         self.train_acc = []
         self.val_acc = []
+        self.train_loss = []
+        self.val_loss = []
         #recorder
 
     def setup_seed_(self, seed):
@@ -143,6 +146,7 @@ class PPO(nn.Module):
         loss_fn = nn.MSELoss()
         rewards = []
         discounted_reward = 0
+        total_loss = 0
 
         for reward, is_terminal, next_value in zip(reversed(self.buffer.rewards),
                                        reversed(self.buffer.is_terminals), 
@@ -190,11 +194,15 @@ class PPO(nn.Module):
                 loss = -torch.min(surr1, surr2) + 0.5 * \
                     loss_fn(rewards[idx], state_values) - 0.01 * dist_entropy
                 
+                
+                total_loss += loss_fn(rewards[idx], state_values).sum().item()
+                
+                
                 # take gradient step
                 self.policy_opt.zero_grad()
                 loss.mean().backward()
                 self.policy_opt.step()
-        
+        self.train_loss.append(total_loss)
         # Copy new weights into old policy
         self.policy_old.load_state_dict(self.policy.state_dict())
         # std decay

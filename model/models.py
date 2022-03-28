@@ -191,8 +191,8 @@ class CriticFC(nn.Module):
     
     def forward(self, s, weight):
         v1 = self.fcs(s)
-        v2 = self.fca(weight)
-        value = self.out(self.relu(v1 + v2))
+        #v2 = self.fca(weight)
+        value = self.out(self.relu(v1)) #+ v2))
         return value
     
     

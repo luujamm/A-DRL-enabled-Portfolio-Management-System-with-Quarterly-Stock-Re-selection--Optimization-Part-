@@ -2,6 +2,7 @@ import itertools
 import numpy as np
 import time
 import random
+import matplotlib.pyplot as plt
 
 from test import test
 from environment.portfolio_new import PortfolioEnv
@@ -138,3 +139,5 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
         seed+=SEED_STEP
 
     draw_train_summary(args, agent, path)
+    plt.plot(agent.train_loss)
+    plt.savefig(path + '/loss.png')

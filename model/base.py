@@ -19,8 +19,10 @@ class ActorCritic(nn.Module):
         
         if self.args.algo == 'PPO':
             self.CNN = create_model(args, day_length, action_dim)
-            self.critic = FNN(args, action_dim, self.hidden_dim1,
-                              self.hidden_dim2, self.output_dim)
+            #self.critic = FNN(args, action_dim, self.hidden_dim1,
+            #                  self.hidden_dim2, self.output_dim)
+            self.critic = create_model(args, day_length, action_dim)
+            self.critic_fc = CriticFC(action_dim, self.hidden_dim2, self.output_dim)
         elif self.args.algo == 'DDPG':
             self.actor = create_model(args, day_length, action_dim)
             self.critic = create_model(args, day_length, action_dim)
@@ -31,7 +33,9 @@ class ActorCritic(nn.Module):
     def forward(self, state, weight):
         if self.args.algo == 'PPO':
             x = self.CNN(state, weight)
-            value = self.critic(x)
+            s = self.critic(state, weight)
+            value = self.critic_fc(s, weight)
+            #value = self.critic(x)
         elif self.args.algo == 'DDPG':
             x = self.actor(state, weight) 
             s = self.critic(state, weight)

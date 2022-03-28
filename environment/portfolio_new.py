@@ -168,6 +168,7 @@ class PortfolioSim(object):
         r1 = np.log((p1 + EPS) / (self.p0 + EPS))  # log rate of return
         excess_ew_return = rho1 + 1 - np.mean((y0 * y1)[1:])
         reward = r1 - self.lam1 * np.max(w1) + self.lam2 * excess_ew_return # penalty on centralized weight
+        #print(r1, self.lam2 * excess_ew_return, reward)
         
         self.p0 = p1
 
