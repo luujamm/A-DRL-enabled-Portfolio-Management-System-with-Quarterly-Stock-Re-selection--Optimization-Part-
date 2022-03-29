@@ -2,8 +2,8 @@
 
 from train import policy_learn
 from test import policy_test
-from model.PPOagent import Agent
-from model.autoencoder import Autoencoder
+from model.agent import Agent
+
 from utils.define_args import define_args
 from utils.data import get_targets
 from utils.create_repository import create_path
@@ -29,27 +29,27 @@ def targets(year=None, Q=None, num=None):
 def main():
     args = define_args()
     agent_name = args.algo + '_' + args.model
-    ae = Autoencoder(args)  
+    
     
     # train
     if not args.test and not args.backtest: 
         path = create_path(args)
         
         year = 2018
-        Q = 4
+        Q = 1
         target_stocks, action_dim = targets(year=year, Q=Q, num=20)
-        agent = Agent(args, action_dim, agent_name)
-        policy_learn(args, agent, ae, target_stocks, path, year, Q)  
+        agent = Agent(args, action_dim)
+        policy_learn(args, agent, target_stocks, path, year, Q)  
     # test   
     else: 
         year = 2019
         Q = 4
         target_stocks, action_dim = targets(year=year, Q=Q, num=20)
-        agent = Agent(args, action_dim, agent_name)
+        agent = Agent(args, action_dim)
         test_dir = './save_/2022-03-18/102422'
         if args.case == 3:
             test_dir += ('/' + str(year) + 'Q' + str(Q))
-        policy_test(args, agent, ae, target_stocks, test_dir, year, Q)
+        policy_test(args, agent, target_stocks, test_dir, year, Q)
 
     
 if __name__ == '__main__':

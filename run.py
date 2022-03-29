@@ -4,8 +4,7 @@ import os
 from train import policy_learn
 from test import policy_test
 from path import test_path
-from model.PPOagent import Agent
-from model.autoencoder import Autoencoder
+from model.agent import Agent
 from utils.define_args import define_args
 from utils.data import *
 from utils.create_repository import create_path
@@ -31,9 +30,6 @@ def targets(year=None, Q=None, num=None):
 def main():
     args = define_args()
     years, quaters = get_years_and_quarters()
-    agent_name = args.algo + '_' + args.model
-    
-    ae = Autoencoder(args)  
     
     # train
     if not args.test and not args.backtest:  
@@ -41,17 +37,18 @@ def main():
         for year in years[:]:
             for Q in quaters[:]:
                 target_stocks, action_dim = targets(year=year, Q=Q, num=20)
-                agent = Agent(args, action_dim, agent_name)
-                policy_learn(args, agent, ae, target_stocks, path, year, Q)  
+                agent = Agent(args, action_dim)
+                policy_learn(args, agent, target_stocks, path, year, Q)  
     # test   
     else:
         test_dir = test_path()
         testcases = []
-        with open(test_dir+'test.txt', 'r') as f:
+        with open(test_dir + 'test.txt', 'r') as f:
             for line in f:
                 testcases.append(line.replace('\n', ''))
         
         testfile = test_dir + 'output.txt'
+
         if os.path.exists(testfile):
             os.remove(testfile)
         
@@ -60,15 +57,16 @@ def main():
                 num = (year - 2018) * 4 + (Q - 1)
                 args.iter = testcases[num]
                 target_stocks, action_dim = targets(year=year, Q=Q, num=20)
-                agent = Agent(args, action_dim, agent_name)
+                agent = Agent(args, action_dim)
 
                 if args.case == 3:
                     test_dir_ = test_dir + str(year) + 'Q' + str(Q)
 
-                output = policy_test(args, agent, ae, target_stocks, test_dir_, year, Q)
+                output = policy_test(args, agent, target_stocks, test_dir_, year, Q)
 
                 with open(testfile, 'a') as o:
                     o.write(output)
+
 
 if __name__ == '__main__':
     main()

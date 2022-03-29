@@ -5,7 +5,8 @@ import torch.nn as nn
 import torch.optim as optim
 
 from torch.distributions import MultivariateNormal
-from .models import CNN_res, CNN_tcn, FNN, CNN_EIIE
+from .base import ActorCritic
+
 
 EPS = 1e-8
 STEP = 0.01
@@ -40,41 +41,11 @@ class RolloutBuffer:
 
     def __len__(self):
         return len(self.actions)
-    
 
-class ActorCritic(nn.Module):
-    def __init__(self, args, day_length, action_dim, agent_name):
-        super(ActorCritic, self).__init__()
-        self.hidden_dim1 = 64
-        self.hidden_dim2 = 64
-        self.output_dim = 1
-        
-        if agent_name == 'PPO_res':
-            self.CNN = CNN_res(args, day_length, action_dim)
-        elif agent_name == 'PPO_tcn':
-            self.CNN = CNN_tcn(args, day_length, action_dim)
-        elif agent_name == 'PPO_EIIE':
-            self.CNN = CNN_EIIE(args, day_length, action_dim)
-        else:
-            raise NotImplementedError
-            
-        self.critic = FNN(args, action_dim, self.hidden_dim1,
-                          self.hidden_dim2, self.output_dim)
-        self.softmax = nn.Softmax(1)
-        
-    def forward(self, state, weight):
-        x = self.CNN(state, weight)
-        value = self.critic(x)
-        action_mean = self.softmax(x)
-           
-        return value, action_mean
-
-
-class Agent(nn.Module):
-    def __init__(self, args, action_dim, agent_name):
-        super(Agent, self).__init__()
+class PPO(nn.Module):
+    def __init__(self, args, action_dim):
+        super(PPO, self).__init__()
         setup_seed(args.seed)
-        self.eps = EPS
         self.action_dim = action_dim
         self.args = args
         self.device = args.device
@@ -88,13 +59,13 @@ class Agent(nn.Module):
         self.eps_clip = args.eps_clip
         self.dist_entropy_coef = args.dist_entropy_coef
         self.tau = args.tau
-        self.policy = ActorCritic(args, self.day_length, self.action_dim, agent_name).to(self.device)
+        self.policy = ActorCritic(args, self.day_length, self.action_dim).to(self.device)
         self.policy_opt = optim.Adam([
             {'params': self.policy.CNN.parameters()},
-            {'params': self.policy.critic.parameters(), 'lr': self.args.lrv}],
-            lr=self.args.lra)#, weight_decay=0.01)
+            {'params': self.policy.critic.parameters(), 'lr': self.args.lrv},],
+            lr=self.args.lra)
         self.policy_old = ActorCritic(
-            args, self.day_length, self.action_dim, agent_name).to(self.device)
+            args, self.day_length, self.action_dim).to(self.device)
         self.policy_old.load_state_dict(self.policy.state_dict())
         self.relu = nn.ReLU()
         self.step = torch.FloatTensor([STEP]).to(self.device)
@@ -107,6 +78,8 @@ class Agent(nn.Module):
         self.val_value = []
         self.train_acc = []
         self.val_acc = []
+        self.train_loss = []
+        self.val_loss = []
         #recorder
 
     def setup_seed_(self, seed):
@@ -170,9 +143,9 @@ class Agent(nn.Module):
         
     def update(self):
         loss_fn = nn.MSELoss()
-        eps = self.eps
         rewards = []
         discounted_reward = 0
+        total_loss = 0
 
         for reward, is_terminal, next_value in zip(reversed(self.buffer.rewards),
                                        reversed(self.buffer.is_terminals), 
@@ -211,7 +184,6 @@ class Agent(nn.Module):
                 
                 # Finding Surrogate Loss
                 advantages = rewards[idx] - state_values.detach()
-                #advantages = (advantages - advantages.mean()) / (advantages.std() + eps)
                 
                 surr1 = ratios * advantages
                 surr2 = torch.clamp(ratios, 1-self.eps_clip,
@@ -221,25 +193,22 @@ class Agent(nn.Module):
                 loss = -torch.min(surr1, surr2) + 0.5 * \
                     loss_fn(rewards[idx], state_values) - 0.01 * dist_entropy
                 
+                
+                total_loss += loss_fn(rewards[idx], state_values).sum().item()
+                
+                
                 # take gradient step
                 self.policy_opt.zero_grad()
                 loss.mean().backward()
                 self.policy_opt.step()
-        
+        self.train_loss.append(total_loss)
         # Copy new weights into old policy
-        #self.policy_old.load_state_dict(self.policy.state_dict())
-        self.soft_update(self.policy_old, self.policy, self.tau)
-        
+        self.policy_old.load_state_dict(self.policy.state_dict())
+        # std decay
         self.std_train = max(self.std_train * self.std_decay, 1e-4)
         # clear buffer
         self.buffer.clear()
         
-    @staticmethod
-    def soft_update(target_net, net, tau):
-        '''update target network by _soft_ copying from behavior network'''
-        for target, behavior in zip(target_net.parameters(), net.parameters()):
-            target.data.copy_(tau * behavior.data + (1-tau) * target.data)
-
     def save(self, model_path):
         torch.save(self.policy_old.state_dict(), model_path)
 

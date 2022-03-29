@@ -21,7 +21,7 @@ def create_testfile():
                 model =  path + '/agent_test' + str(case) + '_iter' + str(it) + '.pth'
                 if os.path.exists(model):#and not find:
                     print('Testfile add ' + model)
-                    with open(test_dir + 'test.txt', 'a') as f:
+                    with open(testfile, 'a') as f:
                         f.write(str(it) + '\n')
                     break
                 

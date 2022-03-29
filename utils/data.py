@@ -1,11 +1,8 @@
 import numpy as np
 import pickle
 
-
-YEARS = [2018, 2019, 2020, 2021]
-
+YEARS = [2018, 2019]#, 2020, 2021]
 QUARTERS = [1, 2, 3, 4]
-
 QUARTER_DATES = {
     '2018_Q1': ['2014-10-01', '2017-10-02', '2018-01-02', '2018-04-02'],
     '2018_Q2': ['2015-01-02', '2018-01-02', '2018-04-02', '2018-07-02'],
@@ -71,23 +68,21 @@ def normalize(x):
         x: input of any shape
     Returns: normalized data
     """
+    return (x - 1) #* 100
 
-    return (x - 1) * 100
 
-
-def obs_normalizer(observation):
+def state_normalizer(state):
     """ Preprocess observation obtained by environment
     Args:
         observation: (nb_classes, window_length, num_features) or with info
     Returns: normalized
     """
-
-    observation = observation[:, 1:, :] / observation[:, -1:, -1:] # normalize to last close
-    #observation = observation[:, 1:, :4] / observation[:, :-1, -1:] # normalize to previous close
-    
-    observation = normalize(observation) # do "(x - 1)*100"
-
-    return observation#/norm
+    # state = state / state[:, -1:, -1:] # normalize to last close
+    state = state / state[:, :, -1:] # test 1
+    #state = np.concatenate((state[:, :1, :], state), axis=1) # test 2
+    #state = state[:, 1:, :] / state[:, :-1, -1:] # test 2
+    state = normalize(state) # do "(x - 1)*100"
+    return state
 
 
 def get_init_action(dim, random=False, ew=False):
@@ -115,25 +110,16 @@ def transform_data(args, history, dating):
     return history, dating, data
 
 
-def transform_state(args, ae, state, observation):
-    #cash = np.ones((1, state.shape[1], state.shape[2]))
-    cash = cash_state(state)
-    state = np.concatenate((cash, state), 0)
-    
-    
-    if args.closeae:
-        if observation.shape[1] == args.state_length:
-            observation = np.concatenate((observation[:, 1:2, :], observation), axis=1)
-        state = obs_normalizer(observation[:,:,:])  # remove cash element and normalize
-                
-    else:
-        state = ae.extract(state)
-    
+def generate_state(observation):
+    cash = cash_state(observation)
+    state = np.concatenate((cash, observation), 0)
+    state = state_normalizer(state)
     return state
 
-def cash_state(state):
-    cash = np.ones((1, state.shape[1], state.shape[2]))
-    rfr = np.array([1.01])
+
+def cash_state(obs):
+    cash = np.ones((1, obs.shape[1], obs.shape[2]))
+    rfr = np.array([1.0])
     rate = np.exp(np.log(rfr) / 365)
     for i in range(cash.shape[1]-1):
         cash[:, i+1:, :] *= rate
@@ -146,6 +132,15 @@ def get_quarter_dates():
 
 def get_years_and_quarters():
     return YEARS, QUARTERS
+
+
+def index_to_date(index, dating):
+    return dating[index]    
+
+
+def date_to_index(date_string, dating):
+    date_idx = np.where(dating == date_string)
+    return date_idx[0][0]  
 
 
 
