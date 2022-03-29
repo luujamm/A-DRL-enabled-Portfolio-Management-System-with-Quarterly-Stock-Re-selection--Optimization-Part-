@@ -62,8 +62,7 @@ class PPO(nn.Module):
         self.policy = ActorCritic(args, self.day_length, self.action_dim).to(self.device)
         self.policy_opt = optim.Adam([
             {'params': self.policy.CNN.parameters()},
-            {'params': self.policy.critic.parameters(), 'lr': self.args.lrv},
-            {'params': self.policy.critic_fc.parameters(), 'lr': self.args.lrv}],
+            {'params': self.policy.critic.parameters(), 'lr': self.args.lrv},],
             lr=self.args.lra)
         self.policy_old = ActorCritic(
             args, self.day_length, self.action_dim).to(self.device)
