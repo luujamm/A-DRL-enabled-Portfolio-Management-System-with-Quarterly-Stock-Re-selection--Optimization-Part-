@@ -5,19 +5,11 @@ import torch.nn as nn
 import torch.optim as optim
 
 from torch.distributions import MultivariateNormal
-from .base import ActorCritic
+from .base import ActorCritic, setup_seed
 
 
 EPS = 1e-8
 STEP = 0.01
-
-
-def setup_seed(seed):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.backends.cudnn.deterministic = True
 
 
 class RolloutBuffer:

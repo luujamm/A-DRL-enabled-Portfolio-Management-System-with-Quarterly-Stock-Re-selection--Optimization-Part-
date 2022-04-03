@@ -23,7 +23,7 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
     agent.train()
     
     action_dim = len(target_stocks) + 1
-    sample_times = args.trajectory_sample_times if args.algo == 'PPO' else 1
+    sample_times = args.trajectory_sample_times# if args.algo == 'PPO' else 1
     rfr = risk_free_return()
     
     iteration_start_time = time.time()
@@ -37,11 +37,17 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
     
     if args.algo == 'PPO':
         agent.std = agent.std_train
-    env = PortfolioEnv(args, train_history, train_data, action_dim, 
+    '''env = PortfolioEnv(args, train_history, train_data, action_dim, 
                             train_dating, train_history, steps=args.train_period_length,
-                        sample_start_date=train_start_date)
+                        sample_start_date=train_start_date)'''
                             
     for st in range(sample_times):
+        if args.algo == 'DDPG':
+            start_date = index_to_date(date_to_index(train_start_date, train_dating) + st, train_dating) 
+        else: start_date = train_start_date
+        env = PortfolioEnv(args, train_history, train_data, action_dim, 
+                            train_dating, train_history, steps=args.train_period_length,
+                        sample_start_date=train_start_date)
         trajectory_reward = 0
         daily_return = []
         observation, _ = env.reset()
@@ -49,12 +55,15 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
         current_weights = get_init_action(action_dim, random=True)
         
         for t in itertools.count(start=1):
-            # choose action       
-            use_action, action, action_log_prob, _ = agent.choose_action(state, current_weights)
+            # choose action
+            if args.algo == 'PPO':       
+                use_action, action, action_log_prob, _ = agent.choose_action(state, current_weights)
+            elif args.algo == 'DDPG':
+                use_action = agent.choose_action(state, current_weights)
               
             # execute action
             new_weights, next_observation, reward, excess_ew_return, done, trade_info, _ = env.step(current_weights, use_action)
-
+            
             # recorder
             if excess_ew_return > 0:
                 train_correct += 1 / args.train_period_length / sample_times
@@ -73,9 +82,14 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
             # store transition
             if args.algo == 'PPO':
                 agent.append(state, next_value, current_weights, action, action_log_prob, reward, done)
+            elif args.algo == 'DDPG':
+                agent.append(current_weights, state, use_action, reward, state_, done)
             else: #DPG
                 agent.append(state, state_, next_value, current_weights, action, action_log_prob, reward, done, trade_info['return'])
-                
+            
+            if args.algo == 'DDPG' and len(agent.memory.epi_buffer) == args.capacity:
+                agent.update()
+
             state = state_
             current_weights = new_weights
             trajectory_reward += reward
@@ -83,9 +97,11 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
             if done:
                 recorder.ptfl_values.append(trade_info["portfolio_value"])
                 recorder.rewards.append(trajectory_reward)
-                
+                if args.algo == 'DDPG':
+                    agent.epi_append()
                 break
-    agent.update()
+    if args.algo == 'PPO':
+        agent.update()
                 
     mean_reward = np.mean(recorder.rewards) / args.train_period_length
     
@@ -128,7 +144,8 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
         agent.setup_seed_(seed)
         train_recorder.clear()
         val_recorder.clear()
-        model_fn = train(args, agent, train_recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path)   
+        model_fn = train(args, agent, train_recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path) 
+        args.val = True  
         test(args, agent, val_recorder, target_stocks, val_history,  val_dating, train_end_date,
              it+1, tu_his, model_fn=model_fn, path=path)
         use_time = time.time() - start_time

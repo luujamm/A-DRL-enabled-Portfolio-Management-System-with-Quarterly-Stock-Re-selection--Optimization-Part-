@@ -1,7 +1,7 @@
 import numpy as np
 import pickle
 
-YEARS = [2018, 2019]#, 2020, 2021]
+YEARS = [2018, 2019, 2020, 2021]
 QUARTERS = [1, 2, 3, 4]
 QUARTER_DATES = {
     '2018_Q1': ['2014-10-01', '2017-10-02', '2018-01-02', '2018-04-02'],
@@ -25,7 +25,7 @@ QUARTER_DATES = {
 
 def get_targets(year, Q, num):
     start_year = 2018
-    with open('./utils/company_buy_0313.pickle', 'rb') as f:
+    with open('./utils/company_buy_9.pickle', 'rb') as f:
         all_target = pickle.load(f)
         for t in all_target:
             if 'PYPL' in t:
@@ -99,13 +99,8 @@ def get_init_action(dim, random=False, ew=False):
     return init_action
 
 
-def transform_data(args, history, dating):
-    data = None
-    if args.closeae:    
-        data = history.copy()
-    else:
-        data, dating = feature_convert(history, dating)
-        history = history[:, -len(dating):, :]
+def transform_data(args, history, dating):  
+    data = history.copy()
         
     return history, dating, data
 

@@ -5,19 +5,13 @@ def define_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--test', action='store_true')
-    parser.add_argument('--closeae', action='store_false')
+    parser.add_argument('--val', action='store_true')
     parser.add_argument('--algo', default='PPO')
     parser.add_argument('--model', default='tcn')
     parser.add_argument('--case', default=3, type=int)
     parser.add_argument('--seed', default=20, type=int)
     parser.add_argument('-t', '--trial', action='store_true')
     parser.add_argument('-bt', '--backtest', action='store_true')
-    
-    # ae pretrain
-    parser.add_argument('--pretrain', action='store_true')
-    parser.add_argument('--pretrain_ae', default='./save_/AE_pretrain_1214.pth')
-    parser.add_argument('--pretrain_batch_size', default=64, type=int)
-    parser.add_argument('--pretrain_epoch', default=1000, type=int)
     
     # env
     parser.add_argument('--trading_cost', default=0.002, type=float)
@@ -34,11 +28,13 @@ def define_args():
     parser.add_argument('-b', '--batch_size', default=64, type=int)
     parser.add_argument('--lrv', default=1e-4, type=float)
     parser.add_argument('--lra', default=0.0015, type=float)
-    parser.add_argument('--tau', default=1, type=float)
+    parser.add_argument('--tau', default=0.05, type=float)
     parser.add_argument('-p', '--dropout_rate', default=0, type=float)
     
-    # algo (PPO)
+    # algo
     parser.add_argument('--gamma', default=0.99, type=float) 
+
+    # algo (PPO)
     parser.add_argument('--action_std_train', default=0.001, type=float)
     parser.add_argument('--action_std_decay_rate', default=0.99, type=float)
     parser.add_argument('--action_std_test', default=1e-10, type=float)
@@ -47,6 +43,12 @@ def define_args():
     parser.add_argument('--eps_clip', default=0.2, type=float)
     parser.add_argument('--dist_entropy_coef', default=1e-2, type=float)
     
+    # algo (DDPG)
+    parser.add_argument('--Gau_var', default=0.2, type=float)
+    parser.add_argument('--Gau_decay', default=0.99995, type=float)
+    parser.add_argument('--capacity', default=252, type=int)
+
+
     # train
     parser.add_argument('--train_iter', default=30, type=int)
         
@@ -54,8 +56,5 @@ def define_args():
     parser.add_argument('-i', '--iter', default='all')
     parser.add_argument('--test_diff', default=[], type=list)
     
-    # DDPG
-    parser.add_argument('--Gau_var', default=0.2, type=float)
-    parser.add_argument('--Gau_decay', default=0.99995, type=float)
     
     return parser.parse_args()
