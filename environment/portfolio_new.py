@@ -66,12 +66,13 @@ class DataGenerator(object):
         # np.random.seed(args.seed)
         np.random.seed(args.seed)
         
+        self.args = args
         self.steps = steps
         self.window_length = args.state_length
         self.start_idx = start_idx
         self.start_date = start_date
         self.dating = dating
-        self.bias = 50 if args.closeae else 20 #讓train和test的起始idx相同
+        self.bias = 50  #讓train和test的起始idx相同
         # make immutable class
         self._history_data = history.copy()  # axis:[assets,dates,ohlc]
         
@@ -90,6 +91,7 @@ class DataGenerator(object):
         else:
             # compute index corresponding to start_date for repeatable sequence
             self.idx = date_to_index(self.start_date, self.dating) - self.start_idx
+            #if self.args.algo == 'PPO' or self.args.val or self.args.test:
             self.steps = self._history_data.shape[1] - self.idx - 1
 
             assert self.idx >= self.window_length and self.idx <= self._history_data.shape[1] - self.steps, \
@@ -115,7 +117,7 @@ class DataGenerator(object):
 
         # used for compute optimal action and sanity check
         ground_truth_obs = self.history_data[:, (self.step + self.window_length):(self.step + self.window_length + 1), :].copy()
-
+        
         done = self.step >= self.steps
         return obs, done, ground_truth_obs
 
@@ -152,6 +154,7 @@ class PortfolioSim(object):
             e.g. [1.0, 0.9, 1.1]
         Numbered equations are from https://arxiv.org/abs/1706.10059
         """
+        
         assert w1.shape == y1.shape, 'w1 and y1 must have the same shape'
         assert y1[0] == 1.0, 'y1[0] must be 1'
         p0 = self.p0 * np.dot(y0, w0) # ptfl value when open 
@@ -166,8 +169,10 @@ class PortfolioSim(object):
 
         rho1 = p1 / self.p0 - 1  # rate of returns
         r1 = np.log((p1 + EPS) / (self.p0 + EPS))  # log rate of return
+        
         excess_ew_return = rho1 + 1 - np.mean((y0 * y1)[1:])
         reward = r1 - self.lam1 * np.max(w1) + self.lam2 * excess_ew_return # penalty on centralized weight
+        
         #print(r1, self.lam2 * excess_ew_return, reward)
         
         self.p0 = p1

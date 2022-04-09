@@ -54,7 +54,10 @@ def test(args, agent, recorder, target_stocks, test_history,
         trade = True
         for t in itertools.count(start=1): 
             if trade:
-                use_action, action, _, _ = agent.choose_action(state, current_weights)
+                if args.algo == 'PPO':
+                    use_action, action, _, _ = agent.choose_action(state, current_weights)
+                elif args.algo == 'DDPG':
+                    use_action = agent.choose_action(state, current_weights)
             else:
                 use_action = init_action
                 
@@ -75,7 +78,7 @@ def test(args, agent, recorder, target_stocks, test_history,
                 recorder.test_record_once(eqwt_trade_info)
                 tu_list.append(tu[0][0])
             
-            if tu[0][0] > TURBULENCE_THRESHOLD:
+            if args.test and tu[0][0] > TURBULENCE_THRESHOLD:
                 trade = False
             else:
                 trade = True

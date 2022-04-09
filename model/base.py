@@ -5,8 +5,16 @@ import torch.nn as nn
 import torch.optim as optim
 
 from torch.distributions import MultivariateNormal
-from .models import CNN_res, CNN_tcn, FNN, CNN_EIIE, CriticFC, create_model
+from .models import FNN, CriticFC, create_model
 
+
+def setup_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    
 
 class ActorCritic(nn.Module):
     def __init__(self, args, day_length, action_dim):
@@ -33,13 +41,11 @@ class ActorCritic(nn.Module):
     def forward(self, state, weight):
         if self.args.algo == 'PPO':
             x = self.CNN(state, weight)
-            #s = self.critic(state, weight)
-            #value = self.critic_fc(s, weight)
             value = self.critic(x)
         elif self.args.algo == 'DDPG':
             x = self.actor(state, weight) 
             s = self.critic(state, weight)
-            value = self.critic_fc(s, weight)
+            value = self.critic_fc(s, x)
             
         action = self.softmax(x)
         
