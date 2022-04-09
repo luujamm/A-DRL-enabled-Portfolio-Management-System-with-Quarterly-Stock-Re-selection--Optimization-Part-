@@ -10,7 +10,7 @@ from utils.evaluation import evaluation_metrics
 from utils.recorder import Recorder
 
 TEST_NUM = 5
-TURBULENCE_THRESHOLD = 170
+TURBULENCE_THRESHOLD = 160
 
 
 def test(args, agent, recorder, target_stocks, test_history, 
