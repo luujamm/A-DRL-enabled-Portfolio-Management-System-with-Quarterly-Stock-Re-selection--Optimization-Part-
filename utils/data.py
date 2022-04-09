@@ -25,7 +25,7 @@ QUARTER_DATES = {
 
 def get_targets(year, Q, num):
     start_year = 2018
-    with open('./utils/company_buy_9.pickle', 'rb') as f:
+    with open('./utils/company_buy_0313.pickle', 'rb') as f:
         all_target = pickle.load(f)
         for t in all_target:
             if 'PYPL' in t:
@@ -68,7 +68,7 @@ def normalize(x):
         x: input of any shape
     Returns: normalized data
     """
-    return (x - 1) #* 100
+    return (x - 1) * 100
 
 
 def state_normalizer(state):
@@ -77,8 +77,8 @@ def state_normalizer(state):
         observation: (nb_classes, window_length, num_features) or with info
     Returns: normalized
     """
-    # state = state / state[:, -1:, -1:] # normalize to last close
-    state = state / state[:, :, -1:] # test 1
+    state = state / state[:, -1:, -1:] # normalize to last close
+    #state = state / state[:, :, -1:] # test 1
     #state = np.concatenate((state[:, :1, :], state), axis=1) # test 2
     #state = state[:, 1:, :] / state[:, :-1, -1:] # test 2
     state = normalize(state) # do "(x - 1)*100"

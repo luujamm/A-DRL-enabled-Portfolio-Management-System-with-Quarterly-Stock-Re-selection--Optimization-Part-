@@ -143,7 +143,7 @@ class YahooDownloader:
 
 
 def get_data(target_stocks, year, Q, status, bench=False):
-    data_repo = '2022-03-31'
+    data_repo = 'data_0316'
     path = './data/' + data_repo + '/' + status + '/' + str(year) + 'Q' + str(Q)
     if bench:
         path += '_bench.csv'
