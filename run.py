@@ -30,13 +30,14 @@ def targets(year=None, Q=None, num=None):
 def main():
     args = define_args()
     years, quaters = get_years_and_quarters()
-    
+    target_num = 20
+
     # train
     if not args.test and not args.backtest:  
         path = create_path(args)
         for year in years[:]:
             for Q in quaters[:]:
-                target_stocks, action_dim = targets(year=year, Q=Q, num=20)
+                target_stocks, action_dim = targets(year=year, Q=Q, num=target_num)
                 agent = Agent(args, action_dim)
                 policy_learn(args, agent, target_stocks, path, year, Q)  
     # test   
@@ -56,7 +57,7 @@ def main():
             for Q in quaters:
                 num = (year - 2018) * 4 + (Q - 1)
                 args.iter = testcases[num]
-                target_stocks, action_dim = targets(year=year, Q=Q, num=20)
+                target_stocks, action_dim = targets(year=year, Q=Q, num=target_num)
                 agent = Agent(args, action_dim)
 
                 if args.case == 3:

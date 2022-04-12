@@ -25,7 +25,7 @@ QUARTER_DATES = {
 
 def get_targets(year, Q, num):
     start_year = 2018
-    with open('./utils/company_buy_0313.pickle', 'rb') as f:
+    with open('./utils/company_buy_5_2.pickle', 'rb') as f:
         all_target = pickle.load(f)
         for t in all_target:
             if 'PYPL' in t:

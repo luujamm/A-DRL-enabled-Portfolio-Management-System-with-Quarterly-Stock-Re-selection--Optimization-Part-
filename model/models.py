@@ -83,6 +83,7 @@ class CNN_tcn(nn.Module):  # Independent Identical Evaluators
         
         ##### layer1 #####
         self.DConv1 = nn.Sequential(
+            
             nn.Conv2d(in_channels=self.in_ch1, out_channels=self.out_ch1,
                       kernel_size=(1, self.cvks1), stride=1,
                       padding=(0, int((self.cvks1+1)/2)),
