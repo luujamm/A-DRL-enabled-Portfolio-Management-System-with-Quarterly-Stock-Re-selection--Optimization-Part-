@@ -1,3 +1,3 @@
 def test_path():
-    path = './save_/2022-03-17/002719_t/'
+    path = './save_/2022-04-12/000303/'
     return path

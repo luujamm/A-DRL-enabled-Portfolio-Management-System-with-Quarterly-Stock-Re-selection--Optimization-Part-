@@ -49,7 +49,7 @@ def download_and_save(dir, year, Q, start, end, target_stocks, status):
 
 def create_dataset():
     date = time.strftime('%Y-%m-%d', time.localtime())
-    dir = './data/' + date
+    dir = './data/' + date 
     if not os.path.exists(dir):
         os.mkdir(dir)
         os.mkdir(dir + '/tu')
