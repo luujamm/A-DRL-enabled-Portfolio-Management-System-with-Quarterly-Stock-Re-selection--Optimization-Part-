@@ -25,9 +25,15 @@ def Sortino_Ratio(daily_return):
 
 def max_drawdown(values):
     """ Max drawdown. See https://www.investopedia.com/terms/m/maximum-drawdown-mdd.asp """
-    peak = values.max()
-    trough = values[values.argmax():].min()
-    return (trough - peak + EPS) / (peak + EPS)
+    if len(values) > 0:
+        peak = values.max()
+        trough = values[values.argmax():].min()
+        mdd1 = (trough - peak + EPS) / (peak + EPS)
+        mdd2 = max_drawdown(values[: values.argmax()])
+        mdd = min(mdd1, mdd2)
+    else:
+        mdd = 0
+    return mdd
 
 
 def evaluation_metrics(daily_return, values):

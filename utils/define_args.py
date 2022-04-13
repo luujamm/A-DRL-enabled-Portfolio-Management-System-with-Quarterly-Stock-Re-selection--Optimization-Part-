@@ -35,7 +35,7 @@ def define_args():
     parser.add_argument('--gamma', default=0.99, type=float) 
 
     # algo (PPO)
-    parser.add_argument('--action_std_train', default=0.001, type=float)
+    parser.add_argument('--action_std_train', default=0.01, type=float)
     parser.add_argument('--action_std_decay_rate', default=0.99, type=float)
     parser.add_argument('--action_std_test', default=1e-10, type=float)
     parser.add_argument('-s', '--trajectory_sample_times', default=8, type=int)
