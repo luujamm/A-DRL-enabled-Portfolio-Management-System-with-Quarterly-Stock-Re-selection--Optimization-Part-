@@ -46,7 +46,7 @@ def define_args():
     # algo (DDPG)
     parser.add_argument('--Gau_var', default=0.2, type=float)
     parser.add_argument('--Gau_decay', default=0.99995, type=float)
-    parser.add_argument('--capacity', default=252, type=int)
+    parser.add_argument('--capacity', default=60, type=int)
 
 
     # train
