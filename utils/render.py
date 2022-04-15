@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 from path import test_path
 from .data import get_years_and_quarters
+from .evaluation import evaluation_metrics
+
+
 def load_value(dates, values, file):
     value = np.array(pickle.load(file))
     
@@ -12,12 +15,17 @@ def load_value(dates, values, file):
         value *= values[-1]
     return np.concatenate((values, value))
 
+
+def load_returns(dates, returns, file):
+    return_ = np.array(pickle.load(file))
+    return np.concatenate((returns, return_))
+
 def render():
     test_dir = test_path()
 
     years, quarters = get_years_and_quarters()
 
-    dates, ptfls, ews, sp500s, sp100s = [], [], [], [], []
+    dates, ptfls, ews, sp500s, sp100s, ptfl_returns, ew_returns = [], [], [], [], [], [], []
 
     for year in years:
         for Q in quarters:
@@ -27,6 +35,8 @@ def render():
                 ews = load_value(dates, ews, f)
                 sp500s = load_value(dates, sp500s, f)
                 sp100s = load_value(dates, sp100s, f)
+                ptfl_returns = load_returns(dates, ptfl_returns, f)
+                ew_returns = load_returns(dates, ew_returns, f)
                 dates+=date
 
     plt.figure(figsize=(8, 6))
@@ -42,4 +52,9 @@ def render():
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.savefig(test_dir + 'result.png')
+    sharpe, sortino, mdd = evaluation_metrics(ptfl_returns, ptfls)
+    ew_sharpe, ew_sortino, ew_mdd = evaluation_metrics(ew_returns, ews)
+    print('======\nOverall Evaluations:')
+    print('RL: Sharpe = {:.3f}, Sortino = {:.3f}, MDD = {:.3f}'.format(sharpe, sortino, mdd))
+    print('EW: Sharpe = {:.3f}, Sortino = {:.3f}, MDD = {:.3f}'.format(ew_sharpe, ew_sortino, ew_mdd))
        

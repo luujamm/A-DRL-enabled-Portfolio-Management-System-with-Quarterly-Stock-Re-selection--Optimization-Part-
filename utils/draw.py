@@ -71,6 +71,8 @@ def show_test_results(args, recorder, target_stocks, test_num, iteration, test_d
         pickle.dump(eqwt_return, f)
         pickle.dump(benchmark_returns[0], f)
         pickle.dump(benchmark_returns[1], f)
+        pickle.dump(recorder.daily_return, f)
+        pickle.dump(recorder.ew_daily_return, f)
     
     sp500_return = benchmark_returns[0, -1]
     
