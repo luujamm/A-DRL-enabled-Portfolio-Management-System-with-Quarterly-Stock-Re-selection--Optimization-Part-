@@ -67,16 +67,18 @@ def test(args, agent, recorder, target_stocks, test_history,
             trajectory_reward += reward
             state_ = generate_state(next_observation)
             state = state_
-            recorder.test_record(use_action, trade_info, eqwt_trade_info)
+
+            recorder.test.record_trades(use_action, trade_info)
             
+            if n_episode == 0:   
+                recorder.ew.record_trades(eqwt_action, eqwt_trade_info)
+                recorder.test.record_date(trade_info)
+                tu_list.append(tu[0][0])
+
             # recorder
             if excess_ew_return > 0:
                 test_correct += 1 / period_length / TEST_NUM 
             # recorder    
-                        
-            if n_episode == 0:   
-                recorder.test_record_once(eqwt_trade_info)
-                tu_list.append(tu[0][0])
             
             if args.test and tu[0][0] > TURBULENCE_THRESHOLD:
                 trade = False
@@ -86,7 +88,7 @@ def test(args, agent, recorder, target_stocks, test_history,
             if done:    
                 break
         
-        recorder.rewards.append(trajectory_reward)
+        recorder.test.rewards.append(trajectory_reward)
         
         
     # recorder    
@@ -107,14 +109,13 @@ def test(args, agent, recorder, target_stocks, test_history,
 
 def policy_test(args, agent, target_stocks, test_dir, year=None, Q=None):
     print('Start Testing')
-    test_recorder = Recorder()
     test_start_date, test_end_date = define_dates(args, year, Q)
     test_history, test_dating = get_data(target_stocks, year, Q, 'test') 
-    
+    recorder = Recorder()
     start_idx = np.argwhere(test_dating == test_start_date)[0][0] + 1
     benchmarks = get_data(['^GSPC', '^OEX'], year, Q, 'test', bench=True)[0][:, start_idx:, :] 
     tu_his, _ = get_data(target_stocks, year, Q, 'tu')
-    test_recorder.benchmarks.append(benchmarks)
+    recorder.benchmark.values.append(benchmarks)
     print('=' * 120, '\nStart date: ' + test_start_date)
 
     if args.iter == 'all':
@@ -126,7 +127,6 @@ def policy_test(args, agent, target_stocks, test_dir, year=None, Q=None):
         test_model_path = test_dir + '/agent_test{}_iter{}.pth'.format(args.case, it)
         print( 'Test model:', test_model_path)
         agent.load(test_model_path) 
-        test_recorder.clear()
-        output = test(args, agent, test_recorder, target_stocks, test_history, 
+        output = test(args, agent, recorder, target_stocks, test_history, 
              test_dating, test_start_date, it, tu_his, test_dir=test_dir)
         return output 

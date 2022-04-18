@@ -95,24 +95,24 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
             trajectory_reward += reward
             
             if done:
-                recorder.ptfl_values.append(trade_info["portfolio_value"])
-                recorder.rewards.append(trajectory_reward)
+                recorder.train.values.append(trade_info["portfolio_value"])
+                recorder.train.rewards.append(trajectory_reward)
                 if args.algo == 'DDPG':
                     agent.epi_append()
                 break
     if args.algo == 'PPO':
         agent.update()
                 
-    mean_reward = np.mean(recorder.rewards) / args.train_period_length
+    mean_reward = np.mean(recorder.train.rewards) / args.train_period_length
     
     # recorder
     agent.train_reward.append(mean_reward)
-    agent.train_value.append(np.mean(recorder.ptfl_values))
+    agent.train_value.append(np.mean(recorder.train.values))
     agent.train_acc.append(train_correct)
     # recorder
     
     print('=' * 120, '\nIter {}  Mean reward: {:.6f} Portfolio value: {:.4f}'
-          .format(iteration, mean_reward, np.mean(recorder.ptfl_values)))
+          .format(iteration, mean_reward, np.mean(recorder.train.values)))
     
     return model_fn
 
@@ -122,7 +122,7 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
     last_use_time = 0
     start_time = time.time()
     seed = args.seed
-    train_recorder, val_recorder = Recorder(), Recorder()
+    recorder = Recorder()
     
     pretrain_start_date, tu_start, train_start_date, train_end_date, val_end_date = define_dates(args, year, Q)
     
@@ -134,7 +134,7 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
     tu_his = get_data(target_stocks, year, Q, 'tu')[0]
     start_idx = np.argwhere(val_dating == train_end_date)[0][0] + 1
     benchmarks = get_data(['^GSPC', '^OEX'], year, Q, 'val', bench=True)[0][:, start_idx:, :] # S&P 500, S&P 100
-    val_recorder.benchmarks.append(benchmarks)
+    recorder.benchmark.values.append(benchmarks)
     quarter = str(year) + 'Q' + str(Q)
     print(quarter)
     if args.case == 3:
@@ -142,11 +142,10 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
     write_abstract(args, path, target_stocks, train_start_date, train_end_date)
     for it in range(args.train_iter):
         agent.setup_seed_(seed)
-        train_recorder.clear()
-        val_recorder.clear()
-        model_fn = train(args, agent, train_recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path) 
+        recorder.clear()
+        model_fn = train(args, agent, recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path) 
         args.val = True  
-        test(args, agent, val_recorder, target_stocks, val_history,  val_dating, train_end_date,
+        test(args, agent, recorder, target_stocks, val_history,  val_dating, train_end_date,
              it+1, tu_his, model_fn=model_fn, path=path)
         use_time = time.time() - start_time
         remain_time = (use_time - last_use_time) * (args.train_iter - it - 1)
