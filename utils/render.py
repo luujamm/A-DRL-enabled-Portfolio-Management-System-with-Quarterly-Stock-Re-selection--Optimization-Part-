@@ -47,6 +47,7 @@ def render():
 
     with open(test_dir + 'result.pickle', 'wb') as f:
         pickle.dump(ptfls, f)
+        pickle.dump(mvs, f)
         pickle.dump(ews, f)
         pickle.dump(sp500s, f)
         pickle.dump(sp100s, f)
