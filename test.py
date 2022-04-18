@@ -69,8 +69,9 @@ def test(args, agent, recorder, target_stocks, test_history,
             state = state_
 
             recorder.test.record_trades(use_action, trade_info)
-            recorder.ew.record_trades(eqwt_action, eqwt_trade_info)
+            
             if n_episode == 0:   
+                recorder.ew.record_trades(eqwt_action, eqwt_trade_info)
                 recorder.test.record_date(trade_info)
                 tu_list.append(tu[0][0])
 

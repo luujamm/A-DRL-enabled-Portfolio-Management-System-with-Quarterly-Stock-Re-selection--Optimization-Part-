@@ -141,9 +141,12 @@ class YahooDownloader:
     
     return target_history, dating'''
 
+def get_data_repo():
+    repo = 'data/cb5_2_0410'
+    return repo
 
 def get_data(target_stocks, year, Q, status, bench=False):
-    data_repo = 'data/cb5_2_0410'
+    data_repo = get_data_repo()
     path = './' + data_repo + '/' + status + '/' + str(year) + 'Q' + str(Q)
     if bench:
         path += '_bench.csv'

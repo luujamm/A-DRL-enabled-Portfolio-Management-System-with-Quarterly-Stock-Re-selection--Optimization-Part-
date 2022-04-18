@@ -14,7 +14,7 @@ def draw_test_figs(args, recorder, target_stocks, test_num):
     test_date = recorder.test.date
     weights = recorder.test.cal_weights(action_dim, test_num)
     final_value, ptfl_return = recorder.test.cal_returns(test_num)
-    eqwt_return = recorder.ew.cal_returns(test_num)[1]
+    eqwt_return = recorder.ew.cal_returns(1)[1]
     benchmark_returns = recorder.benchmark.cal_benchmark_returns(ptfl_return)
 
     plt.figure(figsize=(6, 10))
