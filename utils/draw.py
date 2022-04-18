@@ -11,7 +11,11 @@ def draw_test_figs(args, recorder, target_stocks, test_num):
     stocks_label.insert(0, 'Cash')
     action_dim = len(stocks_label)
     
-    final_value, ptfl_return, eqwt_return, benchmark_returns, weights, test_date = recorder.cal_returns(test_num, action_dim)
+    test_date = recorder.test.date
+    weights = recorder.test.cal_weights(action_dim, test_num)
+    final_value, ptfl_return = recorder.test.cal_returns(test_num)
+    eqwt_return = recorder.ew.cal_returns(test_num)[1]
+    benchmark_returns = recorder.benchmark.cal_benchmark_returns(ptfl_return)
 
     plt.figure(figsize=(6, 10))
     ax = plt.subplot(211)
@@ -34,8 +38,8 @@ def draw_test_figs(args, recorder, target_stocks, test_num):
 
 
 def show_val_results(args, agent, recorder, target_stocks, test_num, iteration, model_fn, path):
-    mean_reward = np.mean(recorder.rewards)/args.val_period_length
-    result = recorder.mean_final_value(test_num)[0]
+    mean_reward = np.mean(recorder.test.rewards)/args.val_period_length
+    result = recorder.test.cal_returns(test_num)[0]
     
     # recorder
     agent.val_reward.append(mean_reward)
@@ -49,10 +53,10 @@ def show_val_results(args, agent, recorder, target_stocks, test_num, iteration, 
         plt.savefig(val_dir)
         plt.close()
     
-    sharpe, sortino, _ = evaluation_metrics(np.array(recorder.daily_return), np.array(recorder.daily_return))
+    sharpe, sortino, _ = evaluation_metrics(np.array(recorder.test.daily_return), np.array(recorder.test.daily_return))
     print('Val rewards = {:.6f}, Value = {:.3f}, Diff = {:2f}, SR = {:.3f}, StR = {:.3f}, Cost = {:.3f}'
-          .format(mean_reward, result, result - recorder.eqwt_values[-1], 
-           sharpe, sortino, recorder.cost/test_num))
+          .format(mean_reward, result, result - recorder.ew.values[-1], 
+           sharpe, sortino, recorder.test.cost/test_num))
 
 
 def show_test_results(args, recorder, target_stocks, test_num, iteration, test_dir):
@@ -71,16 +75,16 @@ def show_test_results(args, recorder, target_stocks, test_num, iteration, test_d
         pickle.dump(eqwt_return, f)
         pickle.dump(benchmark_returns[0], f)
         pickle.dump(benchmark_returns[1], f)
-        pickle.dump(recorder.daily_return, f)
-        pickle.dump(recorder.ew_daily_return, f)
+        pickle.dump(recorder.test.daily_return, f)
+        pickle.dump(recorder.ew.daily_return, f)
     
     sp500_return = benchmark_returns[0, -1]
     
-    sharpe, sortino, mdd = evaluation_metrics(np.array(recorder.daily_return), np.array(ptfl_return))
-    ew_sharpe, ew_sortino, ew_mdd = evaluation_metrics(np.array(recorder.ew_daily_return), np.array(eqwt_return))
-    print('\nAverage Reward {:.5f}'.format(np.mean(recorder.rewards)/args.test_period_length))
+    sharpe, sortino, mdd = evaluation_metrics(np.array(recorder.test.daily_return), np.array(ptfl_return))
+    ew_sharpe, ew_sortino, ew_mdd = evaluation_metrics(np.array(recorder.ew.daily_return), np.array(eqwt_return))
+    print('\nAverage Reward {:.5f}'.format(np.mean(recorder.test.rewards)/args.test_period_length))
     print('Average Portfolio Value {:.5f}, SR = {:.3f}, StR = {:.3f}, MDD = {:.3f}, Cost = {:.3f}'
-          .format(final_value, sharpe, sortino, mdd, recorder.cost/test_num))
+          .format(final_value, sharpe, sortino, mdd, recorder.test.cost/test_num))
     print('EW Value: {:.5f}, Diff= {:.2f}%, SR = {:.3f}, StR = {:.3f}, MDD = {:.3f}'.format(eqwt_return[-1], (final_value - eqwt_return[-1]) * 100, ew_sharpe, ew_sortino, ew_mdd))
     print('S&P 500 : {:.5f}, Diff= {:.2f}%'.format(sp500_return, (final_value - sp500_return) * 100))
     args.test_diff.append((final_value - eqwt_return[-1]) * 100)

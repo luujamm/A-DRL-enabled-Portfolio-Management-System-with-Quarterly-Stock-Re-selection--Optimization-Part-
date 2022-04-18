@@ -20,6 +20,7 @@ def load_returns(dates, returns, file):
     return_ = np.array(pickle.load(file))
     return np.concatenate((returns, return_))
 
+
 def render():
     test_dir = test_path()
 
