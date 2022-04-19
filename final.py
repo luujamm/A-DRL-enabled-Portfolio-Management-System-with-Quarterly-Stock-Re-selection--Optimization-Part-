@@ -17,7 +17,6 @@ def load_values(path):
         dates = pickle.load(f)
     
     return ptfl, mv, ew, sp500, sp100, dates
-        
 
 
 def main():
@@ -27,7 +26,9 @@ def main():
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
 
-    ax.plot(dates, ppo_tcn, dates, ppo_eiie, dates, mv, dates, ew, dates, sp500, dates, sp100)
+    ax.plot(dates, ppo_tcn, dates, ppo_eiie)
+    
+    ax.plot(dates, mv, dates, ew, dates, sp500, dates, sp100)
     fmt_year = mdates.AutoDateLocator()
     fmt = mdates.ConciseDateFormatter(fmt_year)
     fmt_month = mdates.DayLocator(interval=21)
