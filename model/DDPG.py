@@ -147,6 +147,8 @@ class DDPG(nn.Module):
         q_target = reward + (1 - done) * self.gamma * value_.detach()
         value, _ = self.behavior_network(state, weight)
         critic_loss = loss_fn(q_target, value)
+        
+        self.train_loss.append(critic_loss.sum().item())
 
         self.behavior_network.zero_grad()
         critic_loss.backward()

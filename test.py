@@ -94,7 +94,6 @@ def test(args, agent, recorder, target_stocks, test_history,
     # recorder    
     agent.val_acc.append(test_correct)
     # recorder
-    
     #val
     if test_dir == None: 
         show_val_results(args, agent, recorder, target_stocks, TEST_NUM, iteration, model_fn, path)

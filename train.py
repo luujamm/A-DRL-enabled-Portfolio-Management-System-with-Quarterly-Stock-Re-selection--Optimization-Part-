@@ -135,6 +135,7 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
     start_idx = np.argwhere(val_dating == train_end_date)[0][0] + 1
     benchmarks = get_data(['^GSPC', '^OEX'], year, Q, 'val', bench=True)[0][:, start_idx:, :] # S&P 500, S&P 100
     recorder.benchmark.values.append(benchmarks)
+    
     quarter = str(year) + 'Q' + str(Q)
     print(quarter)
     if args.case == 3:

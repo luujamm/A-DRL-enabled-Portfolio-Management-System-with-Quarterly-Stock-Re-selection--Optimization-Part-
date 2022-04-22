@@ -20,6 +20,7 @@ class Container(object):
         self.date.append(trade_info['date'])
 
     def cal_benchmark_returns(self, values):
+        b = np.array(self.values)
         benchmarks = np.array(self.values)[0, :, :values.shape[0], -1]
         benchmark_returns = benchmarks / benchmarks[:, :1]
         return benchmark_returns
@@ -54,7 +55,7 @@ class Recorder(object):
         self.train.clear()
         self.test.clear()
         self.ew.clear()
-        self.benchmark.clear()
+        
 
         
     
