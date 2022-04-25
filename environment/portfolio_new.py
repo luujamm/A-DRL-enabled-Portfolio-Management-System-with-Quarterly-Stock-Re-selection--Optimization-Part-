@@ -173,7 +173,7 @@ class PortfolioSim(object):
         excess_ew_return = rho1 + 1 - np.mean((y0 * y1)[1:])
         reward = r1 - self.lam1 * np.max(w1) + self.lam2 * excess_ew_return # penalty on centralized weight
         
-        #print(r1, self.lam2 * excess_ew_return, reward)
+        #print(r1, excess_ew_return, reward)
         
         self.p0 = p1
 

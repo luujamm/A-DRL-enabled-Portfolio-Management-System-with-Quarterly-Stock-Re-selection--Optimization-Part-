@@ -33,11 +33,11 @@ def mv_weights(year, Q):
 
 def test(args, year, Q, test_start_date):
     target_stocks = get_targets(year=year, Q=Q, num=TARGET_NUM)
-    #weights = mv_weights(year, Q)
-    #weights = np.array(list(weights.values()))
+    weights = mv_weights(year, Q)
+    weights = np.array(list(weights.values()))
 
     # for equal weight
-    weights = np.ones(TARGET_NUM) / TARGET_NUM
+    #weights = np.ones(TARGET_NUM) / TARGET_NUM
     # for equal weight
 
     weights = np.insert(weights, 0, 0)

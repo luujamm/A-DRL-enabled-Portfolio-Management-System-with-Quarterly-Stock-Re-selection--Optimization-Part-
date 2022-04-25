@@ -15,6 +15,7 @@ TU_NONE = 'save_/2022-04-24/120927_none'
 # reward
 R = 'save_/2022-04-24/120927'
 R0 = 'save_/2022-04-24/121248'
+R2 = 'save_/2022-04-25/102421'
 # ew
 top10 = 'data/ew/ew10.pickle'
 top30 = 'data/ew/ew30.pickle'
@@ -63,10 +64,12 @@ def final():
 def reward():
     r, _, _, _, _, dates = load_values(R)
     r0 = load_values(R0)[0]
+    r2 = load_values(R2)[0]
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
     ax.plot(dates, r, dates, r0)
-    legend = ['λ=0.1', 'λ=0']
+    ax.plot(dates, r2)
+    legend = ['λ=0.1', 'λ=0', '0.2']
     f = 'reward'
     fig_setting(ax, legend, f)
 
