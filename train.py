@@ -53,13 +53,14 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
         observation, _ = env.reset()
         state = generate_state(observation)
         current_weights = get_init_action(action_dim, random=True)
+        old_action = current_weights.copy()
         
         for t in itertools.count(start=1):
             # choose action
             if args.algo == 'PPO':       
                 use_action, action, action_log_prob, _ = agent.choose_action(state, current_weights)
             elif args.algo == 'DDPG':
-                use_action = agent.choose_action(state, current_weights)
+                use_action = agent.choose_action(state, old_action)
               
             # execute action
             new_weights, next_observation, reward, excess_ew_return, done, trade_info, _ = env.step(current_weights, use_action)
@@ -83,22 +84,23 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
             if args.algo == 'PPO':
                 agent.append(state, next_value, current_weights, action, action_log_prob, reward, done)
             elif args.algo == 'DDPG':
-                agent.append(current_weights, state, use_action, reward, state_, done)
+                agent.append(old_action, state, use_action, reward, state_, done)
             else: #DPG
                 agent.append(state, state_, next_value, current_weights, action, action_log_prob, reward, done, trade_info['return'])
             
-            if args.algo == 'DDPG' and len(agent.memory.epi_buffer) == args.capacity:
+            if args.algo == 'DDPG' and agent.memory.__len__() > args.batch_size:
                 agent.update()
 
             state = state_
             current_weights = new_weights
+            old_action = use_action
             trajectory_reward += reward
             
             if done:
                 recorder.train.values.append(trade_info["portfolio_value"])
                 recorder.train.rewards.append(trajectory_reward)
-                if args.algo == 'DDPG':
-                    agent.epi_append()
+                #if args.algo == 'DDPG':
+                #    print(agent.memory.__len__())
                 break
     if args.algo == 'PPO':
         agent.update()

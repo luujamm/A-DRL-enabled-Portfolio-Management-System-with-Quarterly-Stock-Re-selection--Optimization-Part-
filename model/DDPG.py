@@ -25,8 +25,7 @@ class ReplayMemory:
     # __slots__ = ['buffer','epi_buffer','capacity']
     def __init__(self, args, capacity=252):
         np.random.seed(args.seed)
-        self.buffer = []
-        self.epi_buffer = deque(maxlen=capacity)
+        self.buffer = deque(maxlen=capacity)
         self.capacity = capacity
 
     def __len__(self):
@@ -36,28 +35,29 @@ class ReplayMemory:
         # (prev_action, state, action, reward, next_state, done)
         self.buffer.append(tuple(transition))
 
-    def epi_append(self):
-        self.epi_buffer.append(self.buffer)
-        self.buffer = []
+    #def epi_append(self):
+    #    self.epi_buffer.append(self.buffer)
+    #    self.buffer = []
 
-    def GDP_epi_idx(self, start, end, bias):  # select episodes based on geometrical distribution
+    #def GDP_epi_idx(self, start, end, bias):  # select episodes based on geometrical distribution
         """
         @:param end: is excluded
         @:param bias: value in (0, 1)
         """
-        ran = np.random.geometric(bias)
-        while ran > end - start:
-            ran = np.random.geometric(bias)
-        result = end - ran
-        return result
+    #    ran = np.random.geometric(bias)
+    #    while ran > end - start:
+    #        ran = np.random.geometric(bias)
+    #    result = end - ran
+    #    return result
     
     def sample(self, batch_size, device):
         '''sample a batch of transition tensors'''
-        epi_idx = self.GDP_epi_idx(0, self.capacity, bias=0.02) 
-        trajectory = self.epi_buffer[epi_idx]
-        batch_start = np.random.randint(low=0, high=len(trajectory)-batch_size)
-        transitions = np.array(trajectory[batch_start:batch_start+batch_size], dtype='object')
+        #epi_idx = self.GDP_epi_idx(0, self.capacity, bias=0.02) 
+        #trajectory = self.epi_buffer[epi_idx]
+        #batch_start = np.random.randint(low=0, high=len(trajectory)-batch_size)
+        #transitions = np.array(trajectory[batch_start:batch_start+batch_size], dtype='object')
         #return (torch.tensor(x, dtype=torch.float, device=device)
+        transitions = random.sample(self.buffer, batch_size)
         return (np.array(x) for x in zip(*transitions))
 
 
@@ -101,12 +101,12 @@ class DDPG(nn.Module):
     def setup_seed_(self, seed):
         setup_seed(seed)
 
-    def choose_action(self, state, weight, noise_inp=True):
+    def choose_action(self, state, old_action, noise_inp=True):
         state = torch.FloatTensor(state[np.newaxis, :]).to(self.device)
-        weight = torch.FloatTensor(weight[np.newaxis, :]).to(self.device) 
-        _, action = self.behavior_network(state, weight)
+        old_action = torch.FloatTensor(old_action[np.newaxis, :]).to(self.device) 
+        _, action = self.behavior_network(state, old_action)
         if noise_inp == True:
-            self.action_noise = GaussianNoise(self.args, dim=len(weight), mu=None, std=self.Gau_var)
+            self.action_noise = GaussianNoise(self.args, dim=len(old_action), mu=None, std=self.Gau_var)
             noise = self.action_noise.sample()
             noise = torch.FloatTensor(noise).to(self.device)
             noised_action = action + noise
@@ -117,8 +117,8 @@ class DDPG(nn.Module):
         else:
             return action.cpu().data.numpy().flatten()
     
-    def append(self, weight, state, action, reward, state_, done):
-        self.memory.append(weight, state, action, [reward], state_, [int(done)])
+    def append(self, old_action, state, action, reward, state_, done):
+        self.memory.append(old_action, state, action, [reward], state_, [int(done)])
     
     def epi_append(self):
         self.memory.epi_append()
@@ -130,9 +130,9 @@ class DDPG(nn.Module):
     
     def update_behavior_network(self):
         loss_fn = nn.MSELoss()
-        weight, state, action, reward, state_, done = self.memory.sample(self.batch_size, self.device)
+        old_action, state, action, reward, state_, done = self.memory.sample(self.batch_size, self.device)
         
-        weight = torch.FloatTensor(weight).to(self.device) 
+        old_action = torch.FloatTensor(old_action).to(self.device) 
         state = torch.FloatTensor(state).to(self.device) 
         action = torch.FloatTensor(action).to(self.device) 
         reward = torch.FloatTensor(reward).to(self.device)
@@ -145,17 +145,17 @@ class DDPG(nn.Module):
         #print(type(value_))#, value_.size())
         #exit()
         q_target = reward + (1 - done) * self.gamma * value_.detach()
-        value, _ = self.behavior_network(state, weight)
+        value, _ = self.behavior_network(state, old_action)
         critic_loss = loss_fn(q_target, value)
         
-        self.train_loss.append(critic_loss.sum().item())
+        self.train_loss.append(critic_loss.mean().item())
 
         self.behavior_network.zero_grad()
-        critic_loss.backward()
+        critic_loss.mean().backward()
         self.critic_opt.step()
 
         # update actor
-        value, _ = self.behavior_network(state, weight)
+        value, _ = self.behavior_network(state, old_action)
         actor_loss = -torch.mean(value)
 
         self.behavior_network.zero_grad()
