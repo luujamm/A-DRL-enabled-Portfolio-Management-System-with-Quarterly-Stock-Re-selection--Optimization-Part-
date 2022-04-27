@@ -53,9 +53,9 @@ def create_dataset():
     if not os.path.exists(dir):
         os.mkdir(dir)
         os.mkdir(dir + '/tu')
-        #os.mkdir(dir + '/train')
-        #os.mkdir(dir + '/val')
-        #os.mkdir(dir + '/test')
+        os.mkdir(dir + '/train')
+        os.mkdir(dir + '/val')
+        os.mkdir(dir + '/test')
     years, quarters = get_years_and_quarters()
     tu_start = '2014-01-05'
     
@@ -65,14 +65,14 @@ def create_dataset():
             key = str(year) + '_Q' + str(Q)
             quarter_dates = get_quarter_dates()
             train_start, train_end, val_end, test_end = (date for date in quarter_dates[key])
-            target_stocks = get_targets(year=year, Q=Q, num=100)
+            target_stocks = get_targets(year=year, Q=Q, num=20)
 
             download_and_save(dir, year, Q, tu_start, train_end, target_stocks, 'tu')
-            #download_and_save(dir, year, Q, train_start, train_end, target_stocks, 'train')
-            #download_and_save(dir, year, Q, train_end, val_end, target_stocks, 'val')
-            #download_and_save(dir, year, Q, val_end, test_end, target_stocks, 'test')
+            download_and_save(dir, year, Q, train_start, train_end, target_stocks, 'train')
+            download_and_save(dir, year, Q, train_end, val_end, target_stocks, 'val')
+            download_and_save(dir, year, Q, val_end, test_end, target_stocks, 'test')
             print('Done')
-
+    
 
 if __name__ == '__main__':
     create_dataset()
