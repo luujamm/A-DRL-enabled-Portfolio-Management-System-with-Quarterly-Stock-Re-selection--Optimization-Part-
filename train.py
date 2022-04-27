@@ -15,7 +15,7 @@ from utils.recorder import Recorder
 from utils.evaluation import risk_free_return
 
 
-SEED_STEP = 42
+SEED_STEP = 0 # test
 EPS = 1e-8
 
 
@@ -23,7 +23,7 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
     agent.train()
     
     action_dim = len(target_stocks) + 1
-    sample_times = args.trajectory_sample_times# if args.algo == 'PPO' else 1
+    sample_times = args.trajectory_sample_times if args.algo == 'PPO' else 1
     rfr = risk_free_return()
     
     iteration_start_time = time.time()
@@ -44,6 +44,7 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
     for st in range(sample_times):
         if args.algo == 'DDPG':
             start_date = index_to_date(date_to_index(train_start_date, train_dating) + st, train_dating) 
+            agent.action_noise.reset()
         else: start_date = train_start_date
         env = PortfolioEnv(args, train_history, train_data, action_dim, 
                             train_dating, train_history, steps=args.train_period_length,

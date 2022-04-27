@@ -5,17 +5,17 @@ import matplotlib.dates as mdates
 
 
 # final
-PPO_TCN_PATH = 'save_/2022-04-24/120927'
+PPO_TCN_PATH = 'save_/2022-04-26/075400'
 PPO_EIIE_PATH = 'save_/2022-04-24/231537'
 DDPG_TCN_PATH = 'save_/2022-04-24/123209'
 DDPG_EIIE_PATH = 'save_/2022-04-24/123311'
 # turbulance
-TU_140 = 'save_/2022-04-24/120927'
-TU_NONE = 'save_/2022-04-24/120927_none'
+TU_140 = PPO_TCN_PATH
+TU_NONE = 'save_/2022-04-26/075400_none'
 # reward
-R = 'save_/2022-04-24/120927'
+R = PPO_TCN_PATH
+R1 = 'save_/2022-04-24/120927'
 R0 = 'save_/2022-04-24/121248'
-R2 = 'save_/2022-04-25/102421'
 # ew
 top10 = 'data/ew/ew10.pickle'
 top30 = 'data/ew/ew30.pickle'
@@ -63,13 +63,12 @@ def final():
 
 def reward():
     r, _, _, _, _, dates = load_values(R)
+    r1 = load_values(R1)[0]
     r0 = load_values(R0)[0]
-    r2 = load_values(R2)[0]
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
-    ax.plot(dates, r, dates, r0)
-    ax.plot(dates, r2)
-    legend = ['λ=0.1', 'λ=0', '0.2']
+    ax.plot(dates, r, dates, r1, dates, r0)
+    legend = ['λ=0.5', 'λ=0.1', 'λ=0']
     f = 'reward'
     fig_setting(ax, legend, f)
 
@@ -102,6 +101,7 @@ def ew():
     legend = ['Top 20', 'All stocks', 'S&P 100']#, '10', '30']
     f = 'ew'
     fig_setting(ax, legend, f)
+    print(ew[-1], ew_all[-1], sp100[-1])
     
 
 def main():

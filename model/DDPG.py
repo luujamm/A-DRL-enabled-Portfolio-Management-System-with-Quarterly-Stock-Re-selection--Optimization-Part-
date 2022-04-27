@@ -20,6 +20,25 @@ class GaussianNoise:
     def sample(self):
         return np.random.normal(self.mu, self.std)
 
+class OrnsteinUhlenbeckProcess:
+    def __init__(self, args, mu, sigma=0.2, theta=.25, dimension=1e-2, x0=None,num_steps=12000):
+        np.random.seed(args.seed)
+        self.theta = theta
+        self.mu = mu
+        self.sigma = sigma
+        self.dt = dimension
+        self.x0 = x0
+        self.reset()
+
+    def sample(self):
+        x = self.x_prev + self.theta * (self.mu - self.x_prev) * self.dt + \
+                self.sigma * np.sqrt(self.dt) * np.random.normal(size=self.mu.shape)
+        self.x_prev = x
+        return x
+
+    def reset(self):
+        self.x_prev = self.x0 if self.x0 is not None else np.zeros_like(self.mu)
+
 
 class ReplayMemory:
     # __slots__ = ['buffer','epi_buffer','capacity']
@@ -86,6 +105,7 @@ class DDPG(nn.Module):
         self.Gau_decay = args.Gau_decay
         self.tau = args.tau
         self.relu = nn.ReLU()
+        self.action_noise = OrnsteinUhlenbeckProcess(self.args, np.zeros(self.action_dim))
 
         #recorder
         self.train_reward = []
@@ -106,7 +126,8 @@ class DDPG(nn.Module):
         old_action = torch.FloatTensor(old_action[np.newaxis, :]).to(self.device) 
         _, action = self.behavior_network(state, old_action)
         if noise_inp == True:
-            self.action_noise = GaussianNoise(self.args, dim=len(old_action), mu=None, std=self.Gau_var)
+            #self.action_noise = GaussianNoise(self.args, dim=len(old_action), mu=None, std=self.Gau_var)
+            
             noise = self.action_noise.sample()
             noise = torch.FloatTensor(noise).to(self.device)
             noised_action = action + noise

@@ -57,7 +57,7 @@ def test(args, agent, recorder, target_stocks, test_history,
                 if args.algo == 'PPO':
                     use_action, action, _, _ = agent.choose_action(state, current_weights)
                 elif args.algo == 'DDPG':
-                    use_action = agent.choose_action(state, current_weights)
+                    use_action = agent.choose_action(state, current_weights, noise_inp=False)
             else:
                 use_action = init_action
                 

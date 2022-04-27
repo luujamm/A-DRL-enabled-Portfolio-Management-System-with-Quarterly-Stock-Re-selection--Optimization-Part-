@@ -43,12 +43,12 @@ def main():
         policy_learn(args, agent, target_stocks, path, year, Q)  
     # test   
     else: 
-        year = 2021
-        Q = 4
+        year = 2019
+        Q = 2
         target_stocks, action_dim = targets(year=year, Q=Q, num=20)
         
         agent = Agent(args, action_dim)
-        test_dir = './save_/2022-04-23/125032'
+        test_dir = './save_/2022-04-25/195539'
         if args.case == 3:
             test_dir += ('/' + str(year) + 'Q' + str(Q))
         policy_test(args, agent, target_stocks, test_dir, year, Q)
