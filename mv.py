@@ -32,12 +32,14 @@ def mv_weights(year, Q):
 
 
 def test(args, year, Q, test_start_date):
-    target_stocks = get_targets(year=year, Q=Q, num=TARGET_NUM)
-    weights = mv_weights(year, Q)
-    weights = np.array(list(weights.values()))
-
+    target_stocks = get_targets(year=year, Q=Q, num=None)
+    #weights = mv_weights(year, Q)
+    #weights = np.array(list(weights.values()))
+    target_stocks = target_stocks[:20]
+    TARGET_NUM = len(target_stocks)
+    
     # for equal weight
-    #weights = np.ones(TARGET_NUM) / TARGET_NUM
+    weights = np.ones(TARGET_NUM) / TARGET_NUM
     # for equal weight
 
     weights = np.insert(weights, 0, 0)
@@ -67,7 +69,7 @@ def test(args, year, Q, test_start_date):
 
 
 def save(dates, returns):
-    with open('./' + data_repo + '/ew30.pickle', 'wb') as f:
+    with open('./' + data_repo + '/ew_g1.pickle', 'wb') as f:
         pickle.dump(returns, f)
     
 
