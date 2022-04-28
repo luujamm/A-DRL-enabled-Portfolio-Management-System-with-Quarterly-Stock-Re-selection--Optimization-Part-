@@ -21,7 +21,7 @@ class GaussianNoise:
         return np.random.normal(self.mu, self.std)
 
 class OrnsteinUhlenbeckProcess:
-    def __init__(self, args, mu, sigma=0.2, theta=.25, dimension=1e-2, x0=None,num_steps=12000):
+    def __init__(self, args, mu, sigma=0.2, theta=.15, dimension=1e-2, x0=None,num_steps=12000):
         np.random.seed(args.seed)
         self.theta = theta
         self.mu = mu

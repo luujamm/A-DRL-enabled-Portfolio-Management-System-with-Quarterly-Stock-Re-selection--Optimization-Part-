@@ -142,8 +142,8 @@ class YahooDownloader:
     return target_history, dating'''
 
 def get_data_repo():
-    #repo = 'data/cb5_2_0410'
-    repo = 'data/ew'
+    repo = 'data/cb5_2_0410'
+    #repo = 'data/ew'
     return repo
 
 def get_data(target_stocks, year, Q, status, bench=False):
