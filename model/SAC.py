@@ -175,6 +175,7 @@ class SAC(nn.Module):
             
             min_q_value = a * torch.min(new_q1_value, new_q2_value) - self.alpha * logprob_ 
             next_q_value = reward + (1 - done) * self.gamma * min_q_value
+            
             #print(next_q_value.size())
             
 
