@@ -37,7 +37,7 @@ def main():
         
         year = 2019
         Q = 2
-        target_stocks, action_dim = targets(year=year, Q=Q, num=20)
+        target_stocks, action_dim = targets(year=year, Q=Q, num=2)
         
         agent = Agent(args, action_dim)
         policy_learn(args, agent, target_stocks, path, year, Q)  

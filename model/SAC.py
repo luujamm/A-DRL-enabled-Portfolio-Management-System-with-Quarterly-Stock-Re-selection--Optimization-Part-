@@ -167,7 +167,7 @@ class SAC(nn.Module):
         weight_ = weights_[idx]
         reward = rewards[idx].unsqueeze(1)
         done = dones[idx].unsqueeze(1)
-        a = 1
+        a = 0.1
         with torch.no_grad():
             action_, logprob_ = self.evaluate(state_, weight_)        
             #logprob_ = logprob_.unsqueeze(1)
@@ -175,6 +175,7 @@ class SAC(nn.Module):
             
             min_q_value = a * torch.min(new_q1_value, new_q2_value) - self.alpha * logprob_ 
             next_q_value = reward + (1 - done) * self.gamma * min_q_value
+            
             
             #print(next_q_value.size())
             
