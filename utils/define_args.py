@@ -48,6 +48,9 @@ def define_args():
     parser.add_argument('--Gau_decay', default=0.99995, type=float)
     parser.add_argument('--capacity', default=10000, type=int)
 
+    # algo (SAC)
+    parser.add_argument('-a', '--alpha', default=0.0002, type=float)
+
 
     # train
     parser.add_argument('--train_iter', default=30, type=int)

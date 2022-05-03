@@ -48,7 +48,7 @@ def main():
         target_stocks, action_dim = targets(year=year, Q=Q, num=20)
         
         agent = Agent(args, action_dim)
-        test_dir = './save_/2022-04-28/140605'
+        test_dir = './save_/2022-05-02/175416'
         if args.case == 3:
             test_dir += ('/' + str(year) + 'Q' + str(Q))
         policy_test(args, agent, target_stocks, test_dir, year, Q)

@@ -62,6 +62,8 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
                 use_action, action, action_log_prob, _ = agent.choose_action(state, current_weights)
             elif args.algo == 'DDPG':
                 use_action = agent.choose_action(state, old_action)
+            elif args.algo == 'SAC':
+                use_action, action, action_log_prob = agent.choose_action(state, current_weights)
               
             # execute action
             new_weights, next_observation, reward, excess_ew_return, done, trade_info, _ = env.step(current_weights, use_action)
@@ -84,6 +86,8 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
             # store transition
             if args.algo == 'PPO':
                 agent.append(state, next_value, current_weights, action, action_log_prob, reward, done)
+            elif args.algo == 'SAC':
+                agent.append(state, state_, current_weights, new_weights, use_action, reward, done)
             elif args.algo == 'DDPG':
                 agent.append(old_action, state, use_action, reward, state_, done)
             else: #DPG
@@ -103,7 +107,7 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
                 #if args.algo == 'DDPG':
                 #    print(agent.memory.__len__())
                 break
-    if args.algo == 'PPO':
+    if args.algo == 'PPO' or args.algo == 'SAC':
         agent.update()
                 
     mean_reward = np.mean(recorder.train.rewards) / args.train_period_length
