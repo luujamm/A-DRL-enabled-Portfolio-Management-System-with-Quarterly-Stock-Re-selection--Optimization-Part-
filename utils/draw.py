@@ -46,7 +46,7 @@ def show_val_results(args, agent, recorder, target_stocks, test_num, iteration, 
     agent.val_value.append(result)
     # recorder
     if args.algo == 'SAC':
-        t = 90
+        t = 99
     else:
         t = 9
 
