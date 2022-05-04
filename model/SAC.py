@@ -228,5 +228,5 @@ class SAC(nn.Module):
     def load(self, model_path):
         model = torch.load(model_path)
         self.policy.load_state_dict(model)
-        self.target_net.load_state_dict(model)
+        
     

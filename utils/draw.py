@@ -45,8 +45,12 @@ def show_val_results(args, agent, recorder, target_stocks, test_num, iteration, 
     agent.val_reward.append(mean_reward)
     agent.val_value.append(result)
     # recorder
-    
-    if len(agent.val_reward) > 9 and mean_reward >= np.max(agent.val_reward[9:]):
+    if args.algo == 'SAC':
+        t = 90
+    else:
+        t = 9
+
+    if len(agent.val_reward) > t and mean_reward >= np.max(agent.val_reward[t:]):
         agent.save(model_fn)
         val_dir = path + '/iter{:d}_val.png'.format(iteration)
         plt = draw_test_figs(args, recorder, target_stocks, test_num)[0]

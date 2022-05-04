@@ -15,7 +15,7 @@ from utils.recorder import Recorder
 from utils.evaluation import risk_free_return
 
 
-SEED_STEP = 0 # test
+SEED_STEP = 42 # test
 EPS = 1e-8
 
 
@@ -69,8 +69,7 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
             # execute action
             new_weights, next_observation, reward, excess_ew_return, done, trade_info, _ = env.step(current_weights, use_action)
             #new_weights, next_observation, reward, excess_ew_return, done, trade_info, _ = env.step(current_weights, action)
-            if t == 1:
-                print(action, reward)
+            
             # recorder
             if excess_ew_return > 0:
                 train_correct += 1 / args.train_period_length / sample_times
@@ -155,11 +154,12 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
         agent.setup_seed_(seed)
         recorder.clear()
         model_fn = train(args, agent, recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path) 
+        #model_fn = train(args, agent, recorder, target_stocks, val_history, val_dating, train_end_date, it+1, path) 
         args.val = True  
-        test(args, agent, recorder, target_stocks, train_history,  train_dating, train_start_date,
-             it+1, tu_his, model_fn=model_fn, path=path)
-        #test(args, agent, recorder, target_stocks, val_history,  val_dating, train_end_date,
+        #test(args, agent, recorder, target_stocks, train_history,  train_dating, train_start_date,
         #     it+1, tu_his, model_fn=model_fn, path=path)
+        test(args, agent, recorder, target_stocks, val_history,  val_dating, train_end_date,
+             it+1, tu_his, model_fn=model_fn, path=path)
         use_time = time.time() - start_time
         remain_time = (use_time - last_use_time) * (args.train_iter - it - 1)
         print('Time usage: {:.0f} min {:.0f} s, remain: {:.0f} min {:.0f} s'
