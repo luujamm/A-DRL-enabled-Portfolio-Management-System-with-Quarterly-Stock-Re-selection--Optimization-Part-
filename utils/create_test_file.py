@@ -17,7 +17,7 @@ def create_testfile():
             path = test_dir + str(year) + 'Q' + str(Q)
             
             #find = False
-            for it in range(300, 9, -1):
+            for it in range(1000, 9, -1):
                 model =  path + '/agent_test' + str(case) + '_iter' + str(it) + '.pth'
                 if os.path.exists(model):#and not find:
                     print('Testfile add ' + model)
