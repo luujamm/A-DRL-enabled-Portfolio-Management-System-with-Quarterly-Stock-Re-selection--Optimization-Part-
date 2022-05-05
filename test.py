@@ -16,7 +16,7 @@ TURBULENCE_THRESHOLD = 140
 def test(args, agent, recorder, target_stocks, test_history, 
          test_dating, sample_start_date, iteration, tu_his, test_dir=None, model_fn=None, path=None):
     agent.eval()
-    if args.algo == 'PPO':
+    if args.algo == 'PPO' or args.algo == 'SAC':
         agent.std = args.action_std_test
     action_dim = len(target_stocks) + 1
     seeds = (args.seed + i for i in range(TEST_NUM)) 
@@ -58,6 +58,8 @@ def test(args, agent, recorder, target_stocks, test_history,
                     use_action, action, _, _ = agent.choose_action(state, current_weights)
                 elif args.algo == 'DDPG':
                     use_action = agent.choose_action(state, current_weights, noise_inp=False)
+                elif args.algo == 'SAC':
+                    _, use_action, _ = agent.choose_action(state, current_weights)
             else:
                 use_action = init_action
                 

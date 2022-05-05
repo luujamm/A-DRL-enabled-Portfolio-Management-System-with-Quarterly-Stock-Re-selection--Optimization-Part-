@@ -15,7 +15,7 @@ from utils.recorder import Recorder
 from utils.evaluation import risk_free_return
 
 
-SEED_STEP = 0 # test
+SEED_STEP = 42 # test
 EPS = 1e-8
 
 
@@ -53,7 +53,8 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
         daily_return = []
         observation, _ = env.reset()
         state = generate_state(observation)
-        current_weights = get_init_action(action_dim, random=True)
+        #current_weights = get_init_action(action_dim, random=True)
+        current_weights = get_init_action(action_dim, random=False)
         old_action = current_weights.copy()
         
         for t in itertools.count(start=1):
@@ -62,9 +63,12 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
                 use_action, action, action_log_prob, _ = agent.choose_action(state, current_weights)
             elif args.algo == 'DDPG':
                 use_action = agent.choose_action(state, old_action)
+            elif args.algo == 'SAC':
+                use_action, action, action_log_prob = agent.choose_action(state, current_weights)
               
             # execute action
             new_weights, next_observation, reward, excess_ew_return, done, trade_info, _ = env.step(current_weights, use_action)
+            #new_weights, next_observation, reward, excess_ew_return, done, trade_info, _ = env.step(current_weights, action)
             
             # recorder
             if excess_ew_return > 0:
@@ -84,6 +88,8 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
             # store transition
             if args.algo == 'PPO':
                 agent.append(state, next_value, current_weights, action, action_log_prob, reward, done)
+            elif args.algo == 'SAC':
+                agent.append(state, state_, current_weights, new_weights, use_action, reward, done)
             elif args.algo == 'DDPG':
                 agent.append(old_action, state, use_action, reward, state_, done)
             else: #DPG
@@ -103,7 +109,7 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
                 #if args.algo == 'DDPG':
                 #    print(agent.memory.__len__())
                 break
-    if args.algo == 'PPO':
+    if args.algo == 'PPO' or args.algo == 'SAC':
         agent.update()
                 
     mean_reward = np.mean(recorder.train.rewards) / args.train_period_length
@@ -147,7 +153,7 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
     for it in range(args.train_iter):
         agent.setup_seed_(seed)
         recorder.clear()
-        model_fn = train(args, agent, recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path) 
+        model_fn = train(args, agent, recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path)  
         args.val = True  
         test(args, agent, recorder, target_stocks, val_history,  val_dating, train_end_date,
              it+1, tu_his, model_fn=model_fn, path=path)

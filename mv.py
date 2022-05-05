@@ -35,7 +35,7 @@ def test(args, year, Q, test_start_date):
     target_stocks = get_targets(year=year, Q=Q, num=None)
     #weights = mv_weights(year, Q)
     #weights = np.array(list(weights.values()))
-    target_stocks = target_stocks[:20]
+    target_stocks = target_stocks[:]
     TARGET_NUM = len(target_stocks)
     
     # for equal weight
@@ -93,7 +93,7 @@ def main():
     sharpe, sortino, mdd = evaluation_metrics(np.array(mv_daily_returns), mv_returns)
     print('MV Portfolio Value {:.5f}, SR = {:.3f}, StR = {:.3f}, MDD = {:.3f}'
           .format(mv_returns[-1], sharpe, sortino, mdd))
-    save(dates, mv_returns)
+    #save(dates, mv_returns)
             
 
 if __name__ == '__main__':

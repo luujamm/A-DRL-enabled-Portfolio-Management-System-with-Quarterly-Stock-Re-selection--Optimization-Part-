@@ -19,7 +19,7 @@ def draw_test_figs(args, recorder, target_stocks, test_num):
 
     plt.figure(figsize=(6, 10))
     ax = plt.subplot(211)
-    ax.plot(test_date, ptfl_return, test_date, eqwt_return, test_date, benchmark_returns[0], test_date, benchmark_returns[1])
+    ax.plot(test_date, ptfl_return, test_date, eqwt_return)#, test_date, benchmark_returns[0], test_date, benchmark_returns[1])
     fmt_month = mdates.DayLocator(bymonthday=1)#, interval=20)
     fmt_day = mdates.DayLocator(interval=1)
     ax.xaxis.set_major_locator(fmt_month)
@@ -45,8 +45,12 @@ def show_val_results(args, agent, recorder, target_stocks, test_num, iteration, 
     agent.val_reward.append(mean_reward)
     agent.val_value.append(result)
     # recorder
-    
-    if len(agent.val_reward) > 9 and mean_reward >= np.max(agent.val_reward[9:]):
+    if args.algo == 'SAC':
+        t = 99
+    else:
+        t = 9
+
+    if len(agent.val_reward) > t and mean_reward >= np.max(agent.val_reward[t:]):
         agent.save(model_fn)
         val_dir = path + '/iter{:d}_val.png'.format(iteration)
         plt = draw_test_figs(args, recorder, target_stocks, test_num)[0]
