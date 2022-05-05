@@ -153,11 +153,8 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
     for it in range(args.train_iter):
         agent.setup_seed_(seed)
         recorder.clear()
-        model_fn = train(args, agent, recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path) 
-        #model_fn = train(args, agent, recorder, target_stocks, val_history, val_dating, train_end_date, it+1, path) 
+        model_fn = train(args, agent, recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path)  
         args.val = True  
-        #test(args, agent, recorder, target_stocks, train_history,  train_dating, train_start_date,
-        #     it+1, tu_his, model_fn=model_fn, path=path)
         test(args, agent, recorder, target_stocks, val_history,  val_dating, train_end_date,
              it+1, tu_his, model_fn=model_fn, path=path)
         use_time = time.time() - start_time
