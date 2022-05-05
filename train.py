@@ -15,7 +15,7 @@ from utils.recorder import Recorder
 from utils.evaluation import risk_free_return
 
 
-SEED_STEP = 42 # test
+SEED_STEP = 42
 EPS = 1e-8
 
 
@@ -53,8 +53,7 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
         daily_return = []
         observation, _ = env.reset()
         state = generate_state(observation)
-        #current_weights = get_init_action(action_dim, random=True)
-        current_weights = get_init_action(action_dim, random=False)
+        current_weights = get_init_action(action_dim, random=True)
         old_action = current_weights.copy()
         
         for t in itertools.count(start=1):
@@ -68,7 +67,6 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
               
             # execute action
             new_weights, next_observation, reward, excess_ew_return, done, trade_info, _ = env.step(current_weights, use_action)
-            #new_weights, next_observation, reward, excess_ew_return, done, trade_info, _ = env.step(current_weights, action)
             
             # recorder
             if excess_ew_return > 0:
@@ -106,8 +104,6 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
             if done:
                 recorder.train.values.append(trade_info["portfolio_value"])
                 recorder.train.rewards.append(trajectory_reward)
-                #if args.algo == 'DDPG':
-                #    print(agent.memory.__len__())
                 break
     if args.algo == 'PPO' or args.algo == 'SAC':
         agent.update()
