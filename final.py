@@ -5,13 +5,14 @@ import matplotlib.dates as mdates
 
 
 # final
-PPO_TCN_PATH = 'save_/2022-04-26/075400'
-PPO_EIIE_PATH = 'save_/2022-04-24/231537'
-DDPG_TCN_PATH = 'save_/2022-04-24/123209'
-DDPG_EIIE_PATH = 'save_/2022-04-24/123311'
+PPO_TCN_PATH = 'save_/result/PPO_TCN'
+PPO_EIIE_PATH = 'save_/result/PPO_EIIE'
+DDPG_TCN_PATH = 'save_/result/DDPG_TCN'
+DDPG_EIIE_PATH = 'save_/result/DDPG_EIIE'
+SAC_TCN_PATH = 'save_/2022-05-05/165038'
 # turbulance
 TU_140 = PPO_TCN_PATH
-TU_NONE = 'save_/2022-04-26/075400_none'
+TU_NONE = 'save_/result/PPO_TCN_notu'
 # reward
 R = PPO_TCN_PATH
 R1 = 'save_/2022-04-24/120927'
@@ -57,12 +58,14 @@ def final():
     ppo_eiie = load_values(PPO_EIIE_PATH)[0]
     ddpg_tcn = load_values(DDPG_TCN_PATH)[0]
     ddpg_eiie = load_values(DDPG_EIIE_PATH)[0]
+    sac_tcn = load_values(SAC_TCN_PATH)[0]
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
     ax.plot(dates, ppo_tcn, dates, ppo_eiie)
     ax.plot(dates, ddpg_tcn, dates, ddpg_eiie)
+    ax.plot(dates, sac_tcn)
     ax.plot(dates, mv, dates, ew, dates, sp500, dates, sp100)
-    legend = ['PPO+TCN', 'PPO+EIIE', 'DDPG+TCN', 'DDPG+EIIE', 'MV', 'EW', 'S&P 500', 'S&P 100']
+    legend = ['PPO+TCN', 'PPO+EIIE', 'DDPG+TCN', 'DDPG+EIIE', 'SAC+TCN', 'MV', 'EW', 'S&P 500', 'S&P 100']
     f = 'final'
     fig_setting(ax, legend, f)
 
