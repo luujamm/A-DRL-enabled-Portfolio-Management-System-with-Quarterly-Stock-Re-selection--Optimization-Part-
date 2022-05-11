@@ -132,9 +132,6 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
     pretrain_start_date, tu_start, train_start_date, train_end_date, val_end_date = define_dates(args, year, Q)
     
     train_history, train_dating = get_data(target_stocks, year, Q, 'train')
-    if args.algo == 'DPG':
-        start_idx = date_to_index(train_start_date, train_dating)
-        train_start_date = index_to_date(start_idx + random.randint(0, len(train_dating) - start_idx - args.batch_size), train_dating)
     val_history, val_dating = get_data(target_stocks, year, Q, 'val') 
     tu_his = get_data(target_stocks, year, Q, 'tu')[0]
     start_idx = np.argwhere(val_dating == train_end_date)[0][0] + 1
