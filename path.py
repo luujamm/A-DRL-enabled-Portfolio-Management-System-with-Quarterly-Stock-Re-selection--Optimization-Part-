@@ -1,3 +1,3 @@
 def test_path():
-    path = './save_/result/DDPG_TCN/'
+    path = './save_/result/PPO_EIIE/'
     return path

@@ -65,8 +65,8 @@ def create_dataset():
             key = str(year) + '_Q' + str(Q)
             quarter_dates = get_quarter_dates()
             train_start, train_end, val_end, test_end = (date for date in quarter_dates[key])
-            target_stocks = get_targets(year=year, Q=Q, num=20)
-
+            #target_stocks = get_targets(year=year, Q=Q, num=20)
+            target_stocks = get_targets(year=year, Q=Q)
             download_and_save(dir, year, Q, tu_start, train_end, target_stocks, 'tu')
             download_and_save(dir, year, Q, train_start, train_end, target_stocks, 'train')
             download_and_save(dir, year, Q, train_end, val_end, target_stocks, 'val')

@@ -217,8 +217,8 @@ class CNN_EIIE(nn.Module):
                       padding=(0, int((self.cvks1-1)/2))),
             nn.BatchNorm2d(num_features=self.out_ch1, eps=1e-05, momentum=0.1, 
                             affine=True, track_running_stats=True),
-            #nn.ReLU()
-            nn.Tanh()
+            nn.ReLU()
+            #nn.Tanh()
         )
         
         ##### layer2 #####
@@ -227,8 +227,8 @@ class CNN_EIIE(nn.Module):
                       kernel_size=(1, self.cvks2), stride=1),
             nn.BatchNorm2d(num_features=self.out_ch2, eps=1e-05, momentum=0.1, 
                            affine=True, track_running_stats=True),
-            #nn.ReLU()
-            nn.Tanh()
+            nn.ReLU()
+            #nn.Tanh()
         )
         
         ##### layer3 ##### (prepare to concatenate weights)
