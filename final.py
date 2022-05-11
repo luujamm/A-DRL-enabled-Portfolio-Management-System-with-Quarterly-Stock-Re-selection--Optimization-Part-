@@ -8,8 +8,8 @@ import matplotlib.dates as mdates
 PPO_TCN_PATH = 'save_/result/PPO_TCN'
 PPO_EIIE_PATH = 'save_/result/PPO_EIIE'
 DDPG_TCN_PATH = 'save_/result/DDPG_TCN'
-DDPG_EIIE_PATH = 'save_/result/DDPG_EIIE'
-SAC_TCN_PATH = 'save_/2022-05-05/165038'
+#DDPG_EIIE_PATH = 'save_/result/DDPG_EIIE'
+SAC_TCN_PATH = 'save_/result/SAC'
 # turbulance
 TU_140 = PPO_TCN_PATH
 TU_NONE = 'save_/result/PPO_TCN_notu'
@@ -54,18 +54,18 @@ def fig_setting(ax, legend, file):
 
 
 def final():
-    ppo_tcn, mv, ew, sp500, sp100, dates = load_values(PPO_TCN_PATH)
+    ppo_tcn, mv, ew, _, sp100, dates = load_values(PPO_TCN_PATH)
     ppo_eiie = load_values(PPO_EIIE_PATH)[0]
     ddpg_tcn = load_values(DDPG_TCN_PATH)[0]
-    ddpg_eiie = load_values(DDPG_EIIE_PATH)[0]
+    #ddpg_eiie = load_values(DDPG_EIIE_PATH)[0]
     sac_tcn = load_values(SAC_TCN_PATH)[0]
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
     ax.plot(dates, ppo_tcn, dates, ppo_eiie)
-    ax.plot(dates, ddpg_tcn, dates, ddpg_eiie)
     ax.plot(dates, sac_tcn)
-    ax.plot(dates, mv, dates, ew, dates, sp500, dates, sp100)
-    legend = ['PPO+TCN', 'PPO+EIIE', 'DDPG+TCN', 'DDPG+EIIE', 'SAC+TCN', 'MV', 'EW', 'S&P 500', 'S&P 100']
+    ax.plot(dates, ddpg_tcn)
+    ax.plot(dates, mv, dates, ew, dates, sp100)
+    legend = ['PPO', 'PPO (EIIE)', 'SAC', 'DDPG', 'MV', 'EW', 'S&P 100']
     f = 'final'
     fig_setting(ax, legend, f)
 

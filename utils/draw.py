@@ -92,7 +92,7 @@ def show_test_results(args, recorder, target_stocks, test_num, iteration, test_d
     print('EW Value: {:.5f}, Diff= {:.2f}%, SR = {:.3f}, StR = {:.3f}, MDD = {:.3f}'.format(eqwt_return[-1], (final_value - eqwt_return[-1]) * 100, ew_sharpe, ew_sortino, ew_mdd))
     print('S&P 500 : {:.5f}, Diff= {:.2f}%'.format(sp500_return, (final_value - sp500_return) * 100))
     args.test_diff.append((final_value - eqwt_return[-1]) * 100)
-    output = '{:.3f} {:.3f} {:.3f} {:.3f}\n'.format(final_value, sharpe, sortino, mdd) 
+    output = '{:.3f} {:.3f} {:.3f} {:.3f} {:.3f}\n'.format(final_value, sharpe, sortino, mdd, recorder.test.cost/test_num) 
     return output
 
     

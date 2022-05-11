@@ -50,6 +50,7 @@ def test(args, agent, recorder, target_stocks, test_history,
         
         state = generate_state(observation)
         current_weights = init_action.copy()
+        old_action = init_action.copy()
         eqwt_action = get_init_action(action_dim, ew=True)
         trade = True
         for t in itertools.count(start=1): 
@@ -57,7 +58,7 @@ def test(args, agent, recorder, target_stocks, test_history,
                 if args.algo == 'PPO':
                     use_action, action, _, _ = agent.choose_action(state, current_weights)
                 elif args.algo == 'DDPG':
-                    use_action = agent.choose_action(state, current_weights, noise_inp=False)
+                    use_action = agent.choose_action(state, old_action, noise_inp=False)
                 elif args.algo == 'SAC':
                     _, use_action, _ = agent.choose_action(state, current_weights)
             else:
@@ -69,7 +70,7 @@ def test(args, agent, recorder, target_stocks, test_history,
             trajectory_reward += reward
             state_ = generate_state(next_observation)
             state = state_
-
+            old_action = use_action
             recorder.test.record_trades(use_action, trade_info)
             
             if n_episode == 0:   
