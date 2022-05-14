@@ -1,3 +1,3 @@
 def test_path():
-    path = './save_/2022-05-11/170850/'
+    path = './save_/result/DDPG_TCN/'
     return path
