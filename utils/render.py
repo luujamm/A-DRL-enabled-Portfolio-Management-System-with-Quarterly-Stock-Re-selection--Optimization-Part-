@@ -68,10 +68,7 @@ def render():
     plt.tight_layout()
     plt.savefig(test_dir + 'result.png')
     sharpe, sortino, mdd = evaluation_metrics(ptfl_returns, ptfls)
-    print(ew_returns.shape)
     ew_sharpe, ew_sortino, ew_mdd = evaluation_metrics(ew_returns, ews)
     print('======\nOverall Evaluations:')
     print('RL: Sharpe = {:.3f}, Sortino = {:.3f}, MDD = {:.3f}'.format(sharpe, sortino, mdd))
     print('EW: Sharpe = {:.3f}, Sortino = {:.3f}, MDD = {:.3f}'.format(ew_sharpe, ew_sortino, ew_mdd))
-
-

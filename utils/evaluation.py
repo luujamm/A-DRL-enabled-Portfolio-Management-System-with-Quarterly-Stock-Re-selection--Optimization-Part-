@@ -13,6 +13,8 @@ def risk_free_return():
 def Sharpe_Ratio(daily_return):
     rfr = risk_free_return()
     SR = np.mean(daily_return - rfr + EPS) / (np.std(daily_return) + EPS) * TRADE_DAYS_PER_YEAR ** 0.5
+    #print('return: {:.3f}, std: {:.3f}'.format(np.mean(daily_return - rfr + EPS), np.std(daily_return)))
+    print(np.std(daily_return)*252**0.5)
     return SR
 
 
