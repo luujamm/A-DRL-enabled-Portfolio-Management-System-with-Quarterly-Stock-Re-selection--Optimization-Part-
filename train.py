@@ -42,9 +42,9 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
                         sample_start_date=train_start_date)'''
                             
     for st in range(sample_times):
-        #if args.algo == 'DDPG':
+        if args.algo == 'DDPG':
         #    start_date = index_to_date(date_to_index(train_start_date, train_dating) + st, train_dating) 
-            #agent.action_noise.reset()
+            agent.action_noise.reset()
         #else: start_date = train_start_date
         env = PortfolioEnv(args, train_history, train_data, action_dim, 
                             train_dating, train_history, steps=args.train_period_length,

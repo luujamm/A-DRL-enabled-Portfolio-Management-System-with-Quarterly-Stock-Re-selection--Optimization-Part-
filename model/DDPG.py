@@ -105,7 +105,7 @@ class DDPG(nn.Module):
         self.Gau_decay = args.Gau_decay
         self.tau = args.tau
         self.relu = nn.ReLU()
-        #self.action_noise = OrnsteinUhlenbeckProcess(self.args, np.zeros(self.action_dim))
+        self.action_noise = OrnsteinUhlenbeckProcess(self.args, np.zeros(self.action_dim))
 
         #recorder
         self.train_reward = []
@@ -126,7 +126,7 @@ class DDPG(nn.Module):
         old_action = torch.FloatTensor(old_action[np.newaxis, :]).to(self.device) 
         _, action = self.behavior_network(state, old_action)
         if noise_inp == True:
-            self.action_noise = GaussianNoise(self.args, dim=len(old_action), mu=None, std=self.Gau_var)
+            #self.action_noise = GaussianNoise(self.args, dim=len(old_action), mu=None, std=self.Gau_var)
             
             noise = self.action_noise.sample()
             noise = torch.FloatTensor(noise).to(self.device)
