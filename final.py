@@ -7,7 +7,7 @@ import matplotlib.dates as mdates
 # final
 PPO_TCN_PATH = 'save_/result/PPO_TCN'
 PPO_EIIE_PATH = 'save_/result/PPO_EIIE'
-DDPG_TCN_PATH = 'save_/result/DDPG_TCN'
+DDPG_TCN_PATH = 'save_/result/DDPG'
 #DDPG_EIIE_PATH = 'save_/result/DDPG_EIIE'
 SAC_TCN_PATH = 'save_/result/SAC'
 # turbulance
@@ -27,6 +27,8 @@ ALL = 'data/cb5_2_0410/ew_all.pickle'
 # ew 2
 RE = PPO_TCN_PATH
 NO_RE = 'data/ew/ew_no_re.pickle'
+#result
+NOS = 'save_/result/NOSELECT'
 
 def load_values(path):
 
@@ -39,6 +41,7 @@ def load_values(path):
         dates = pickle.load(f)
     
     return ptfl, mv, ew, sp500, sp100, dates
+
 
 def fig_setting(ax, legend, file):
     fmt_year = mdates.AutoDateLocator()
@@ -80,6 +83,7 @@ def reward():
     legend = ['λ=0.5', 'λ=0.1', 'λ=0']
     f = 'reward'
     fig_setting(ax, legend, f)
+
 
 def turbulence():
     tu_140, _, _, _, _, dates = load_values(TU_140)
@@ -125,7 +129,18 @@ def re():
     legend = ['With Re-selection', 'Without Re-selection', 'S&P 100']
     f = 're'
     fig_setting(ax, legend, f)
-    
+
+
+def result():
+    ppo_tcn, _, ew, _, sp100, dates = load_values(PPO_TCN_PATH)
+    noselect = load_values(NOS)[0]
+    plt.figure(figsize=(8, 6))
+    ax = plt.subplot()
+    ax.plot(dates, ppo_tcn, dates, ew, dates, noselect, dates, sp100)
+    legend = ['Complete System', 'Selection-only', 'Optimization-only', 'S&P 100']
+    f = 'result'
+    fig_setting(ax, legend, f)
+
 
 def main():
     args = sys.argv[1:]
@@ -139,11 +154,8 @@ def main():
         ew()
     elif len(args) == 1 and args[0] == '--re':
         re()
-
-        
-
-    
-    
+    elif len(args) == 1 and args[0] == '--res':
+        result()
 
 
 if __name__ == '__main__':
