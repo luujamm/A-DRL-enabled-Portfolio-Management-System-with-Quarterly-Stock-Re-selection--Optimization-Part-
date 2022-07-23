@@ -17,7 +17,6 @@ class PPO(StochasticRL):
         self.K_epochs = args.K_epochs
         self.eps_clip = args.eps_clip
         self.dist_entropy_coef = args.dist_entropy_coef
-        self.buffer = RolloutBuffer()
         
         self.policy = ActorCritic(args, self.state_length, self.action_dim).to(self.device)
         self.policy_opt = optim.Adam([

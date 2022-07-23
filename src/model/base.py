@@ -11,6 +11,7 @@ from .models import FNN, CriticFC, create_model
 
 LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
+STEP = 0.01
 
 
 def setup_seed(seed):
