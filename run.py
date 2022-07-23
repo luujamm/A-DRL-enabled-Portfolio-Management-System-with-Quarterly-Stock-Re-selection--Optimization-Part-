@@ -1,29 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import os
-from train import policy_learn
-from test import policy_test
-from path import test_path
-from model.agent import Agent
-from utils.define_args import define_args
-from utils.data import *
-from utils.create_repository import create_path
+from src.train import policy_learn
+from src.test import policy_test
+from src.path import test_path
+from src.model.agent import Agent
+from src.utils.define_args import define_args
+from src.utils.data import *
+from src.utils.create_repository import create_path
 
 
 def targets(year=None, Q=None, num=None):
-    if year == None:
-        target_stocks = ['AAPL', 'ADBE', 'AMZN', 'BA', 'BAC', 'CSCO', 'DIS', 'HD', 'HSBC', 'IBM', 'INTC', 
-                         'JNJ', 'KO', 'MRK', 'MSFT', 'NVDA', 'NVO', 'NVS', 'ORCL',  'RY', 'TD', 'VZ', 'WMT']   # DeepBreath target stocks
-        #target_stocks = ['AAPL', 'AXP', 'BA', 'CAT', 'CVX', 'DD','DIS', 'HD', 'IBM', 'INTC', 'JNJ', 'KO',
-        #                 'MCD', 'MMM', 'MRK', 'NKE', 'PFE', 'PG', 'RTX', 'UNH',  'VZ', 'WBA', 'WMT', 'XOM'] # SSRN target
-
-        #target_stocks = ['AXP', 'CAT', 'CVX', 'DD',
-        #                 'MCD', 'MRK',  'PFE', 'PG', 'RTX', 'UNH','WBA', 'XOM'] # SSRN target
-
-        #target_stocks = ['AAPL', 'ADBE', 'AMZN', 'BA', 'BAC', 'CSCO', 'DIS', 'HD', 'HSBC'] # Model test target stocks
-    else:
-        target_stocks = get_targets(year, Q, num)
-    
+    target_stocks = get_targets(year, Q, num)
     return target_stocks , len(target_stocks) + 1
 
     

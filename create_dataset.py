@@ -5,8 +5,8 @@ import yfinance as yf
 import csv
 import os
 import time
-from utils.data import *
-from utils.yahoodownloader import YahooDownloader
+from src.utils.data import *
+from src.utils.yahoodownloader import YahooDownloader
 
 STATE_LENGTH = 100
 

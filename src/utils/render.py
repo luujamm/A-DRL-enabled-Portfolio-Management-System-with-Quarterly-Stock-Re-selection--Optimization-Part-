@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-from path import test_path
+from src.path import test_path
 from .data import get_years_and_quarters
 from .evaluation import evaluation_metrics
 from .yahoodownloader import get_data_repo

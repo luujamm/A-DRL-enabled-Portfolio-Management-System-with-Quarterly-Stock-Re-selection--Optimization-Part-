@@ -1,5 +1,5 @@
 import os
-from path import test_path
+from src.path import test_path
 from .data import get_years_and_quarters
 
 #dir = './save_/2022-02-26/003436/'

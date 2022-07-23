@@ -53,29 +53,9 @@ class ReplayMemory:
     def append(self, *transition):
         # (prev_action, state, action, reward, next_state, done)
         self.buffer.append(tuple(transition))
-
-    #def epi_append(self):
-    #    self.epi_buffer.append(self.buffer)
-    #    self.buffer = []
-
-    #def GDP_epi_idx(self, start, end, bias):  # select episodes based on geometrical distribution
-        """
-        @:param end: is excluded
-        @:param bias: value in (0, 1)
-        """
-    #    ran = np.random.geometric(bias)
-    #    while ran > end - start:
-    #        ran = np.random.geometric(bias)
-    #    result = end - ran
-    #    return result
     
     def sample(self, batch_size, device):
         '''sample a batch of transition tensors'''
-        #epi_idx = self.GDP_epi_idx(0, self.capacity, bias=0.02) 
-        #trajectory = self.epi_buffer[epi_idx]
-        #batch_start = np.random.randint(low=0, high=len(trajectory)-batch_size)
-        #transitions = np.array(trajectory[batch_start:batch_start+batch_size], dtype='object')
-        #return (torch.tensor(x, dtype=torch.float, device=device)
         transitions = random.sample(self.buffer, batch_size)
         return (np.array(x) for x in zip(*transitions))
 
@@ -87,23 +67,18 @@ class DDPG(nn.Module):
         self.action_dim = action_dim
         self.args = args
         self.device = args.device
-        self.day_length = args.state_length
+        self.state_length = args.state_length
         self.batch_size = args.batch_size
         self.gamma = args.gamma
         self.tau = args.tau
-        self.behavior_network = ActorCritic(args, self.day_length, self.action_dim).to(self.device)
+        self.behavior_network = ActorCritic(args, self.state_length, self.action_dim).to(self.device)
         self.actor_opt = optim.Adam(self.behavior_network.actor.parameters(), lr=args.lra)
         self.critic_opt = optim.Adam([{'params': self.behavior_network.critic.parameters()}, 
                                       {'params': self.behavior_network.critic_fc.parameters()}],
                                       lr=self.args.lrv)
-        
-        self.target_network = ActorCritic(
-            args, self.day_length, self.action_dim).to(self.device)
+        self.target_network = ActorCritic(args, self.state_length, self.action_dim).to(self.device)
         self.target_network.load_state_dict(self.behavior_network.state_dict())
         self.memory = ReplayMemory(args, capacity=args.capacity)
-        self.Gau_var = args.Gau_var
-        self.Gau_decay = args.Gau_decay
-        self.tau = args.tau
         self.relu = nn.ReLU()
         self.action_noise = OrnsteinUhlenbeckProcess(self.args, np.zeros(self.action_dim))
 
@@ -126,14 +101,11 @@ class DDPG(nn.Module):
         old_action = torch.FloatTensor(old_action[np.newaxis, :]).to(self.device) 
         _, action = self.behavior_network(state, old_action)
         if noise_inp == True:
-            #self.action_noise = GaussianNoise(self.args, dim=len(old_action), mu=None, std=self.Gau_var)
-            
             noise = self.action_noise.sample()
             noise = torch.FloatTensor(noise).to(self.device)
             noised_action = action + noise
             noised_action = self.relu(noised_action)
             noised_action /= torch.sum(noised_action)
-            self.Gau_var *= self.Gau_decay
             return noised_action.cpu().data.numpy().flatten()
         else:
             return action.cpu().data.numpy().flatten()
@@ -141,36 +113,26 @@ class DDPG(nn.Module):
     def append(self, old_action, state, action, reward, state_, done):
         self.memory.append(old_action, state, action, [reward], state_, [int(done)])
     
-    def epi_append(self):
-        self.memory.epi_append()
-    
     def update(self):
-        
         self.update_behavior_network()
         self.update_target_network()
     
     def update_behavior_network(self):
         loss_fn = nn.MSELoss()
         old_action, state, action, reward, state_, done = self.memory.sample(self.batch_size, self.device)
-        
         old_action = torch.FloatTensor(old_action).to(self.device) 
         state = torch.FloatTensor(state).to(self.device) 
         action = torch.FloatTensor(action).to(self.device) 
         reward = torch.FloatTensor(reward).to(self.device)
         state_ = torch.FloatTensor(state_).to(self.device) 
         done = torch.FloatTensor(done).to(self.device)
+
         # update critic
         value_, action_ = self.target_network(state_, action)
-        #print(type(reward))#, reward.size())
-        #print(type(done))#, done.size())
-        #print(type(value_))#, value_.size())
-        #exit()
         q_target = reward + (1 - done) * self.gamma * value_.detach()
         value, _ = self.behavior_network(state, old_action)
         critic_loss = loss_fn(q_target, value)
-        
         self.train_loss.append(critic_loss.mean().item())
-
         self.behavior_network.zero_grad()
         critic_loss.mean().backward()
         self.critic_opt.step()
@@ -178,15 +140,13 @@ class DDPG(nn.Module):
         # update actor
         value, _ = self.behavior_network(state, old_action)
         actor_loss = -torch.mean(value)
-
         self.behavior_network.zero_grad()
         actor_loss.backward()
         self.actor_opt.step()
     
-    
     def update_target_network(self):
         for target, behavior in zip(self.target_network.parameters(), self.behavior_network.parameters()):
-            target.data.copy_(self.tau * behavior.data + (1-self.tau) * target.data)
+            target.data.copy_(self.tau * behavior.data + (1 - self.tau) * target.data)
 
     def save(self, model_path):
         torch.save({'behavior_network': self.behavior_network.state_dict(),

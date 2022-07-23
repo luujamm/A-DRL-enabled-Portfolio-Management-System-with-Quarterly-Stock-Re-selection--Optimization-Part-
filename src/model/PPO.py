@@ -34,6 +34,7 @@ class RolloutBuffer:
     def __len__(self):
         return len(self.actions)
 
+
 class PPO(nn.Module):
     def __init__(self, args, action_dim):
         super(PPO, self).__init__()
@@ -41,7 +42,7 @@ class PPO(nn.Module):
         self.action_dim = action_dim
         self.args = args
         self.device = args.device
-        self.day_length = args.state_length
+        self.state_length = args.state_length
         self.std = args.action_std_test if self.args.test or self.args.backtest else args.action_std_train
         self.std_train = args.action_std_train
         self.std_decay = args.action_std_decay_rate
@@ -51,13 +52,13 @@ class PPO(nn.Module):
         self.eps_clip = args.eps_clip
         self.dist_entropy_coef = args.dist_entropy_coef
         self.tau = args.tau
-        self.policy = ActorCritic(args, self.day_length, self.action_dim).to(self.device)
+        self.policy = ActorCritic(args, self.state_length, self.action_dim).to(self.device)
         self.policy_opt = optim.Adam([
             {'params': self.policy.CNN.parameters()},
             {'params': self.policy.critic.parameters(), 'lr': self.args.lrv},],
             lr=self.args.lra)
         self.policy_old = ActorCritic(
-            args, self.day_length, self.action_dim).to(self.device)
+            args, self.state_length, self.action_dim).to(self.device)
         self.policy_old.load_state_dict(self.policy.state_dict())
         self.relu = nn.ReLU()
         self.step = torch.FloatTensor([STEP]).to(self.device)
@@ -92,14 +93,11 @@ class PPO(nn.Module):
             dist = self.get_action_dist(action_mean)
             action = dist.sample()
             action_log_prob = dist.log_prob(action) + torch.log(self.step) * self.action_dim
-            
             use_action = self.relu(action).cpu().numpy().flatten() + EPS
             use_action /= np.sum(use_action)
-            
             return use_action, action.cpu().numpy().flatten(), action_log_prob.cpu().numpy().flatten(), value
         
     def evaluate(self, state, action, weight):
-        
         value, action_mean = self.policy(state, weight)
         dist = self.get_action_dist(action_mean)
         action_logprobs = dist.log_prob(action) + torch.log(self.step) * self.action_dim
@@ -185,9 +183,7 @@ class PPO(nn.Module):
                 loss = -torch.min(surr1, surr2) + 0.5 * \
                     loss_fn(rewards[idx], state_values) - 0.01 * dist_entropy
                 
-                
                 total_loss += loss_fn(rewards[idx], state_values).sum().item()
-                
                 
                 # take gradient step
                 self.policy_opt.zero_grad()

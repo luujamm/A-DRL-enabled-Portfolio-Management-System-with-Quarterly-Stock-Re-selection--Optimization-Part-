@@ -2,12 +2,12 @@ import itertools
 import matplotlib.pyplot as plt
 import numpy as np
 
-from environment.portfolio_new import PortfolioEnv
-from utils.data import *
-from utils.yahoodownloader import get_data
-from utils.draw import draw_test_figs, show_test_results, show_val_results
-from utils.evaluation import evaluation_metrics
-from utils.recorder import Recorder
+from src.environment.portfolio_env import PortfolioEnv
+from src.utils.data import *
+from src.utils.yahoodownloader import get_data
+from src.utils.draw import draw_test_figs, show_test_results, show_val_results
+from src.utils.evaluation import evaluation_metrics
+from src.utils.recorder import Recorder
 
 TEST_NUM = 5
 TURBULENCE_THRESHOLD = 140

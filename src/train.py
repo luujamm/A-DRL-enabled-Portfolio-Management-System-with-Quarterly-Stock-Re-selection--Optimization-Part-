@@ -4,15 +4,15 @@ import time
 import random
 import matplotlib.pyplot as plt
 
-from test import test
-from environment.portfolio_new import PortfolioEnv
-from utils.data import *
-from utils.yahoodownloader import get_data
-from utils.create_repository import create_q_path
-from utils.abstract import write_abstract
-from utils.draw import draw_train_summary
-from utils.recorder import Recorder
-from utils.evaluation import risk_free_return
+from src.test import test
+from src.environment.portfolio_env import PortfolioEnv
+from src.utils.data import *
+from src.utils.yahoodownloader import get_data
+from src.utils.create_repository import create_q_path
+from src.utils.abstract import write_abstract
+from src.utils.draw import draw_train_summary
+from src.utils.recorder import Recorder
+from src.utils.evaluation import risk_free_return
 
 
 SEED_STEP = 42

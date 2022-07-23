@@ -16,8 +16,8 @@ TU_140 = PPO_TCN_PATH
 TU_NONE = 'save_/result/PPO_TCN_notu'
 # reward
 R = PPO_TCN_PATH
-R1 = 'save_/2022-04-24/120927'
-R0 = 'save_/2022-04-24/121248'
+R1 = 'save_/result/reward/lambda0_1'
+R0 = 'save_/result/reward/lambda0'
 # ew
 GROUP1 = PPO_TCN_PATH
 GROUP2 = 'data/ew/ew_g2.pickle'
@@ -54,10 +54,10 @@ def fig_setting(ax, legend, file):
     ax.grid()
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig('./' + file + '.png')
+    plt.savefig('./figs/' + file + '.png')
 
 
-def final():
+def optimization():
     ppo_tcn, mv, ew, _, sp100, dates = load_values(PPO_TCN_PATH)
     sac_tcn = load_values(SAC_TCN_PATH)[0]
     ddpg_tcn = load_values(DDPG_TCN_PATH)[0]
@@ -71,7 +71,7 @@ def final():
     ax.plot(dates, ppo_eiie, dates, sac_eiie, dates, ddpg_eiie)
     ax.plot(dates, mv, dates, ew, dates, sp100)
     legend = ['PPO-CTCN', 'SAC-CTCN', 'DDPG-CTCN', 'PPO-EIIE', 'SAC-EIIE', 'DDPG-EIIE', 'MV', 'EW', 'S&P 100']
-    f = 'final'
+    f = 'trading_simulation_for_portfolio_optimization'
     fig_setting(ax, legend, f)
 
 
@@ -83,7 +83,7 @@ def reward():
     ax = plt.subplot()
     ax.plot(dates, r, dates, r1, dates, r0)
     legend = ['λ=0.5', 'λ=0.1', 'λ=0']
-    f = 'reward'
+    f = 'performance_of_reward_function'
     fig_setting(ax, legend, f)
 
 
@@ -94,7 +94,7 @@ def turbulence():
     ax = plt.subplot()
     ax.plot(dates, tu_140, dates, tu_none)
     legend = ['with turbulence', 'without turbulence']
-    f = 'tu'
+    f = 'with_and_without_turbulence_index'
     fig_setting(ax, legend, f)
 
 
@@ -104,7 +104,7 @@ def load_ew(path):
     return ew
 
 
-def ew():
+def formation():
     _, _, group1, _, sp100, dates = load_values(GROUP1)
     group2 = load_ew(GROUP2)
     group3 = load_ew(GROUP3)
@@ -114,9 +114,8 @@ def ew():
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
     ax.plot(dates, group1, dates, group2, dates, group3, dates, group4, dates, group5, dates, all_, dates, sp100)
-    #ax.plot(dates, ew_10, dates, ew_30)
-    legend = ['Group 1', 'Group 2', 'Group 3', 'Group 4', 'Group 5', 'Full Sample', 'S&P 100']#, '10', '30']
-    f = 'ew'
+    legend = ['Group 1', 'Group 2', 'Group 3', 'Group 4', 'Group 5', 'Full Sample', 'S&P 100']
+    f = 'trading_simulation_for_portfolio_formation'
     fig_setting(ax, legend, f)
     print(group1[-1], group2[-1], group3[-1], group4[-1], group5[-1], all_[-1], sp100[-1])
 
@@ -127,9 +126,8 @@ def re():
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
     ax.plot(dates, re, dates, no_re, dates, sp100)
-    #ax.plot(dates, ew_10, dates, ew_30)
     legend = ['With Re-selection', 'Without Re-selection', 'S&P 100']
-    f = 're'
+    f = 'with_and_without_re-selection'
     fig_setting(ax, legend, f)
 
 
@@ -147,13 +145,13 @@ def result():
 def main():
     args = sys.argv[1:]
     if len(args) == 0:
-        final()
+        optimization()
     elif len(args) == 1 and args[0] == '--tu':
         turbulence()
     elif len(args) == 1 and args[0] == '--r':
         reward()
     elif len(args) == 1 and args[0] == '--ew':
-        ew()
+        formation()
     elif len(args) == 1 and args[0] == '--re':
         re()
     elif len(args) == 1 and args[0] == '--res':

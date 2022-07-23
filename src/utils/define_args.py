@@ -16,9 +16,7 @@ def define_args():
     # env
     parser.add_argument('--trading_cost', default=0.002, type=float)
     parser.add_argument('--state_length', default=50, type=int)
-    parser.add_argument('--lam1', default=0.0, type=float) 
-    parser.add_argument('--lam2', default=0.5, type=float)
-    parser.add_argument('--lam3', default=0.0, type=float)
+    parser.add_argument('--lam', default=0.5, type=float)
     
     parser.add_argument('-l', '--train_period_length', default=652, type=int)
     parser.add_argument('-lv', '--val_period_length', default=102, type=int)

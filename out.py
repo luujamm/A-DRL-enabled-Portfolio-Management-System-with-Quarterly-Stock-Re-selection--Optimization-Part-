@@ -1,7 +1,8 @@
 import sys
-from utils.create_test_file import create_testfile
+
 from run import main as run
-from utils.render import render
+from src.utils.create_test_file import create_testfile
+from src.utils.render import render
 
 
 def main():

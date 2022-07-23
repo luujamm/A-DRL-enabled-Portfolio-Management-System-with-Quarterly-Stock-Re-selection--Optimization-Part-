@@ -42,7 +42,7 @@ class SAC(nn.Module):
         self.action_dim = action_dim
         self.args = args
         self.device = args.device
-        self.day_length = args.state_length
+        self.state_length = args.state_length
         self.std = args.action_std_test if self.args.test or self.args.backtest else args.action_std_train
         self.std_train = args.action_std_train
         self.std_decay = args.action_std_decay_rate
@@ -50,11 +50,11 @@ class SAC(nn.Module):
         self.gamma = args.gamma
         self.tau = args.tau
         self.alpha = args.alpha
-        self.policy = PolicyBased(args, self.day_length, self.action_dim).to(self.device)
+        self.policy = PolicyBased(args, self.state_length, self.action_dim).to(self.device)
         self.policy_opt = optim.Adam(self.policy.parameters(), lr=self.args.lra)
-        self.critic = Qnet(args, self.day_length, self.action_dim).to(self.device)
+        self.critic = Qnet(args, self.state_length, self.action_dim).to(self.device)
         self.critic_opt = optim.Adam(self.critic.parameters(), lr=self.args.lrv)
-        self.target_critic = Qnet(args, self.day_length, self.action_dim).to(self.device)
+        self.target_critic = Qnet(args, self.state_length, self.action_dim).to(self.device)
         self.target_critic.load_state_dict(self.critic.state_dict())
 
         self.target_entropy = -action_dim
@@ -169,17 +169,10 @@ class SAC(nn.Module):
         done = dones[idx].unsqueeze(1)
         a = 0.1
         with torch.no_grad():
-            action_, logprob_ = self.evaluate(state_, weight_)        
-            #logprob_ = logprob_.unsqueeze(1)
-            new_q1_value, new_q2_value = self.target_critic(state_, weight_, action_)
-            
+            action_, logprob_ = self.evaluate(state_, weight_) 
+            new_q1_value, new_q2_value = self.target_critic(state_, weight_, action_) 
             min_q_value = a * torch.min(new_q1_value, new_q2_value) - self.alpha * logprob_ 
             next_q_value = reward + (1 - done) * self.gamma * min_q_value
-            
-            
-            #print(next_q_value.size())
-            
-
         
         q1_value, q2_value = self.critic(state, weight, action)
         
@@ -192,26 +185,16 @@ class SAC(nn.Module):
         q1_value, q2_value = self.critic(state, weight, action)
         
         policy_loss = (self.alpha * logprob - a * torch.min(q1_value, q2_value)).mean()
-        #print(self.alpha * logprob.mean(), a * torch.min(q1_value, q2_value).mean())
-        #print(policy_loss)
-        
         total_loss += policy_loss.sum().item()
-        
         self.policy_opt.zero_grad()
         policy_loss.backward()
         self.policy_opt.step()
 
-        
-
         alpha_loss = -(self.log_alpha * (logprob + self.target_entropy).detach()).mean()
-
         self.alpha_opt.zero_grad()
         alpha_loss.backward()
         self.alpha_opt.step()
-
         self.alpha = self.log_alpha.exp()
-        
-
 
         self.train_loss.append(total_loss)
         # Copy new weights into old policy
@@ -228,5 +211,3 @@ class SAC(nn.Module):
     def load(self, model_path):
         model = torch.load(model_path)
         self.policy.load_state_dict(model)
-        
-    

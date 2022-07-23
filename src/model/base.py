@@ -12,7 +12,6 @@ LOG_SIG_MAX = 2
 LOG_SIG_MIN = -20
 
 
-
 def setup_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
