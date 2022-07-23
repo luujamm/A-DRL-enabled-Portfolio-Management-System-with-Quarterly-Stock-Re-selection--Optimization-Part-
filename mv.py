@@ -1,18 +1,18 @@
 import itertools
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+
 from pypfopt.expected_returns import mean_historical_return
 from pypfopt.risk_models import CovarianceShrinkage
 from pypfopt.efficient_frontier import EfficientFrontier
-
 from src.environment.portfolio_env import PortfolioEnv
-from src.utils.define_args import define_args
 from src.utils.data import *
-from src.utils.yahoodownloader import get_data, get_data_repo
+from src.utils.define_args import define_args
 from src.utils.draw import draw_test_figs, show_test_results, show_val_results
 from src.utils.evaluation import evaluation_metrics
 from src.utils.recorder import Container
+from src.utils.yahoodownloader import get_data, get_data_repo
 
 
 data_repo = get_data_repo()
@@ -24,6 +24,7 @@ def mv_weights(year, Q):
     df = pd.read_csv(path)
     df = df[['date', 'close', 'tic']]
     df = df.pivot(index='date', columns='tic', values='close')
+
     mu = mean_historical_return(df)
     S = CovarianceShrinkage(df).ledoit_wolf()
     ef = EfficientFrontier(mu, S)
@@ -37,6 +38,7 @@ def test(args, year, Q, test_start_date):
     #weights = np.array(list(weights.values()))
     target_stocks = target_stocks[:20]
     TARGET_NUM = len(target_stocks)
+    mv_recorder = Container()
     
     # for equal weight
     weights = np.ones(TARGET_NUM) / TARGET_NUM
@@ -52,8 +54,6 @@ def test(args, year, Q, test_start_date):
                            test_dating, tu_his, steps=args.test_period_length,
                            sample_start_date=test_start_date)
     env.reset()
-
-    mv_recorder = Container()
 
     for t in itertools.count(start=1):
         weights, _, _, _, done, mv_trade_info, _ = env.step(weights, weights)
@@ -85,8 +85,10 @@ def main():
             test_start_date = quarter_dates[key][2]
             date, mv_return, mv_daily_return = test(args, year, Q, test_start_date)
             dates += date
+
             if len(mv_returns) > 0:
                 mv_return *= mv_returns[-1]
+
             mv_returns = np.concatenate((mv_returns, mv_return))
             mv_daily_returns += mv_daily_return
             

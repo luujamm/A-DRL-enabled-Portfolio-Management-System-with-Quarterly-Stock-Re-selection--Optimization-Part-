@@ -1,11 +1,12 @@
-import pickle
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-from src.path import test_path
+import pickle
+
 from .data import get_years_and_quarters, get_data_repo
 from .evaluation import evaluation_metrics
+from src.path import test_path
 
 
 def load_value(dates, values, file):
@@ -13,6 +14,7 @@ def load_value(dates, values, file):
     
     if len(dates) > 1:
         value *= values[-1]
+
     return np.concatenate((values, value))
 
 
@@ -24,9 +26,7 @@ def load_returns(dates, returns, file):
 def render():
     test_dir = test_path()
     data_repo = get_data_repo()
-
     years, quarters = get_years_and_quarters()
-
     dates, ptfls, ews, sp500s, sp100s, ptfl_returns, ew_returns = [], [], [], [], [], [], []
 
     for year in years:
@@ -67,6 +67,7 @@ def render():
     plt.savefig(test_dir + 'result.png')
     sharpe, sortino, mdd = evaluation_metrics(ptfl_returns, ptfls)
     ew_sharpe, ew_sortino, ew_mdd = evaluation_metrics(ew_returns, ews)
+    
     print('======\nOverall Evaluations:')
     print('RL: Sharpe = {:.3f}, Sortino = {:.3f}, MDD = {:.3f}'.format(sharpe, sortino, mdd))
     print('EW: Sharpe = {:.3f}, Sortino = {:.3f}, MDD = {:.3f}'.format(ew_sharpe, ew_sortino, ew_mdd))

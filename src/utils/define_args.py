@@ -1,8 +1,10 @@
 import argparse
 
+
 def define_args():
     ## arguments ##
     parser = argparse.ArgumentParser(description=__doc__)
+
     parser.add_argument('--device', default='cuda')
     parser.add_argument('--test', action='store_true')
     parser.add_argument('--val', action='store_true')

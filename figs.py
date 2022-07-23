@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 
-# final
+# optimization
 PPO_TCN_PATH = 'save_/result/PPO_TCN'
 PPO_EIIE_PATH = 'save_/result/PPO_EIIE'
 DDPG_TCN_PATH = 'save_/result/DDPG'
@@ -18,21 +18,20 @@ TU_NONE = 'save_/result/PPO_TCN_notu'
 R = PPO_TCN_PATH
 R1 = 'save_/result/reward/lambda0_1'
 R0 = 'save_/result/reward/lambda0'
-# ew
+# formation
 GROUP1 = PPO_TCN_PATH
 GROUP2 = 'data/ew/ew_g2.pickle'
 GROUP3 = 'data/ew/ew_g3.pickle'
 GROUP4 = 'data/ew/ew_g4.pickle'
 GROUP5 = 'data/ew/ew_g5.pickle'
 ALL = 'data/cb5_2_0410/ew_all.pickle'
-# ew 2
+# re-selection
 RE = PPO_TCN_PATH
 NO_RE = 'data/ew/ew_no_re.pickle'
-#result
+# result
 NOS = 'save_/result/NOSELECT'
 
 def load_values(path):
-
     with open('./' + path + '/result.pickle', 'rb') as f:
         ptfl = pickle.load(f)
         mv = pickle.load(f)
@@ -79,6 +78,7 @@ def reward():
     r, _, _, _, _, dates = load_values(R)
     r1 = load_values(R1)[0]
     r0 = load_values(R0)[0]
+
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
     ax.plot(dates, r, dates, r1, dates, r0)
@@ -90,6 +90,7 @@ def reward():
 def turbulence():
     tu_140, _, _, _, _, dates = load_values(TU_140)
     tu_none = load_values(TU_NONE)[0]
+
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
     ax.plot(dates, tu_140, dates, tu_none)
@@ -101,6 +102,7 @@ def turbulence():
 def load_ew(path):
     with open('./' + path, 'rb') as f:
         ew = pickle.load(f)
+
     return ew
 
 
@@ -111,6 +113,7 @@ def formation():
     group4 = load_ew(GROUP4)
     group5 = load_ew(GROUP5)
     all_ = load_ew(ALL)
+
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
     ax.plot(dates, group1, dates, group2, dates, group3, dates, group4, dates, group5, dates, all_, dates, sp100)
@@ -123,6 +126,7 @@ def formation():
 def re():
     _, _, re, _, sp100, dates = load_values(RE)
     no_re = load_ew(NO_RE)
+
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
     ax.plot(dates, re, dates, no_re, dates, sp100)
@@ -134,6 +138,7 @@ def re():
 def result():
     ppo_tcn, _, ew, _, sp100, dates = load_values(PPO_TCN_PATH)
     noselect = load_values(NOS)[0]
+
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()
     ax.plot(dates, ppo_tcn, dates, ew, dates, noselect, dates, sp100)
@@ -144,16 +149,22 @@ def result():
 
 def main():
     args = sys.argv[1:]
+
     if len(args) == 0:
         optimization()
+
     elif len(args) == 1 and args[0] == '--tu':
         turbulence()
+
     elif len(args) == 1 and args[0] == '--r':
         reward()
+
     elif len(args) == 1 and args[0] == '--ew':
         formation()
+
     elif len(args) == 1 and args[0] == '--re':
         re()
+
     elif len(args) == 1 and args[0] == '--res':
         result()
 

@@ -2,15 +2,12 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 import pickle
+
 from .evaluation import evaluation_metrics
 
 
 def draw_train_figs(args, agent, path):
     x_axis = [i + 1 for i in range(args.train_iter)]
-    plt.plot(x_axis, agent.train_acc, x_axis, agent.val_acc)
-    plt.legend(['Train', 'Val']) 
-    plt.savefig(path + '/train_val_acc.png')
-    plt.close()
     plt.plot(x_axis, agent.train_reward, x_axis, agent.val_reward)
     plt.legend(['Train', 'Val']) 
     plt.savefig(path + '/train_val_reward.png')
@@ -39,6 +36,7 @@ def draw_test_figs(args, recorder, target_stocks, test_num):
     final_value, ptfl_return = recorder.test.cal_returns(test_num)
     eqwt_return = recorder.ew.cal_returns(1)[1]
     benchmark_returns = recorder.benchmark.cal_benchmark_returns(ptfl_return)
+
     plt.figure(figsize=(6, 10))
     ax = plt.subplot(211)
     ax.plot(test_date, ptfl_return, test_date, eqwt_return)
@@ -51,11 +49,12 @@ def draw_test_figs(args, recorder, target_stocks, test_num):
     plt.grid()
     
     bx = plt.subplot(212)
+
     for w in weights:
         bx.plot(w)
+
     bx.legend(stocks_label)
     plt.tight_layout()
-    
     return plt, test_date, final_value, ptfl_return, eqwt_return, benchmark_returns
 
 
@@ -70,6 +69,7 @@ def show_val_results(args, agent, recorder, target_stocks, test_num, iteration, 
 
     if args.algo == 'SAC': # t: number of iterations to start saving models
         t = 100
+
     else:
         t = 10
 
@@ -88,10 +88,13 @@ def show_val_results(args, agent, recorder, target_stocks, test_num, iteration, 
 
 def show_test_results(args, recorder, target_stocks, test_num, iteration, test_dir):
     plt, test_date, final_value, ptfl_return, eqwt_return, benchmark_returns = draw_test_figs(args, recorder, target_stocks, test_num)
+
     if args.test:
         plt.savefig('./' + test_dir + '/test{}_iter{}.png'.format(args.case, iteration))
+
     else:
         plt.savefig('./' + test_dir + '/test{}_iter{}_bt.png'.format(args.case, iteration))
+
     plt.close()
 
     with open('./' + test_dir + '/result.pickle', 'wb') as f:
@@ -106,11 +109,13 @@ def show_test_results(args, recorder, target_stocks, test_num, iteration, test_d
     sp500_return = benchmark_returns[0, -1]
     sharpe, sortino, mdd = evaluation_metrics(np.array(recorder.test.daily_return), np.array(ptfl_return))
     ew_sharpe, ew_sortino, ew_mdd = evaluation_metrics(np.array(recorder.ew.daily_return), np.array(eqwt_return))
+
     print('\nAverage Reward {:.5f}'.format(np.mean(recorder.test.rewards)/args.test_period_length))
     print('Average Portfolio Value {:.5f}, SR = {:.3f}, StR = {:.3f}, MDD = {:.3f}, Cost = {:.3f}'
           .format(final_value, sharpe, sortino, mdd, recorder.test.cost/test_num))
     print('EW Value: {:.5f}, Diff= {:.2f}%, SR = {:.3f}, StR = {:.3f}, MDD = {:.3f}'.format(eqwt_return[-1], (final_value - eqwt_return[-1]) * 100, ew_sharpe, ew_sortino, ew_mdd))
     print('S&P 500 : {:.5f}, Diff= {:.2f}%'.format(sp500_return, (final_value - sp500_return) * 100))
+    
     args.test_diff.append((final_value - eqwt_return[-1]) * 100)
     output = '{:.3f} {:.3f} {:.3f} {:.3f} {:.3f}\n'.format(final_value, sharpe, sortino, mdd, recorder.test.cost/test_num) 
     return output

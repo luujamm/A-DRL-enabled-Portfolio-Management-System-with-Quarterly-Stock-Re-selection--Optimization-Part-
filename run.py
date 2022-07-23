@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-
 import os
-from src.train import policy_learn
-from src.test import policy_test
-from src.path import test_path
+
 from src.model.agent import Agent
-from src.utils.define_args import define_args
-from src.utils.data import *
+from src.path import test_path
+from src.test import policy_test
+from src.train import policy_learn
 from src.utils.create_repository import create_path
+from src.utils.data import *
+from src.utils.define_args import define_args
 
 
 def targets(year=None, Q=None, num=None):
@@ -23,7 +23,8 @@ def main():
     # train
     if not args.test and not args.backtest:  
         path = create_path(args)
-        for year in years[2:]:
+
+        for year in years[:]:
             for Q in quaters[:]:
                 target_stocks, action_dim = targets(year=year, Q=Q, num=target_num)
                 agent = Agent(args, action_dim)
@@ -32,6 +33,7 @@ def main():
     else:
         test_dir = test_path()
         testcases = []
+        
         with open(test_dir + 'test.txt', 'r') as f:
             for line in f:
                 testcases.append(line.replace('\n', ''))

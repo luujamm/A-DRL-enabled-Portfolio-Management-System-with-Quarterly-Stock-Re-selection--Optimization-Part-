@@ -9,5 +9,4 @@ def tu_index(observation, tu_his):
     cov = np.cov(tu_returns)
     cov_ = np.linalg.pinv(cov)
     tu = np.matmul(diff.T, np.matmul(np.linalg.pinv(cov), diff))
-    
     return tu

@@ -1,17 +1,17 @@
 import itertools
-import numpy as np
-import time
-import random
 import matplotlib.pyplot as plt
+import numpy as np
+import random
+import time
 
-from src.test import test
 from src.environment.portfolio_env import PortfolioEnv
-from src.utils.data import *
-from src.utils.create_repository import create_q_path
+from src.test import test
 from src.utils.abstract import write_abstract
+from src.utils.create_repository import create_q_path
+from src.utils.data import *
 from src.utils.draw import show_train_results
-from src.utils.recorder import Recorder
 from src.utils.evaluation import risk_free_return
+from src.utils.recorder import Recorder
 
 
 SEED_STEP = 42
@@ -24,13 +24,8 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
     action_dim = len(target_stocks) + 1
     sample_times = args.trajectory_sample_times if args.algo == 'PPO' else 1
     rfr = risk_free_return()
-    
     iteration_start_time = time.time()
     train_history, train_dating, train_data = transform_data(args, train_history, train_dating)
-    
-    # recorder
-    train_correct = 0
-    # recorder
        
     model_fn = path + '/agent_test{}_iter{}.pth'.format(args.case, iteration)
     
@@ -38,13 +33,13 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
         agent.std = agent.std_train
                             
     for st in range(sample_times):
-        if args.algo == 'DDPG':
-        #    start_date = index_to_date(date_to_index(train_start_date, train_dating) + st, train_dating) 
+        if args.algo == 'DDPG': 
             agent.action_noise.reset()
-        #else: start_date = train_start_date
+
         env = PortfolioEnv(args, train_history, train_data, action_dim, 
                             train_dating, train_history, steps=args.train_period_length,
                         sample_start_date=train_start_date)
+
         trajectory_reward = 0
         daily_return = []
         observation, _ = env.reset()
@@ -56,35 +51,38 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
             # choose action
             if args.algo == 'PPO':       
                 use_action, action, action_log_prob, _ = agent.choose_action(state, current_weights)
+
             elif args.algo == 'DDPG':
                 use_action = agent.choose_action(state, old_action)
+
             elif args.algo == 'SAC':
                 use_action, action, action_log_prob = agent.choose_action(state, current_weights)
               
             # execute action
             new_weights, next_observation, reward, excess_ew_return, done, trade_info, _ = env.step(current_weights, use_action)
             
-            # recorder
-            if excess_ew_return > 0:
-                train_correct += 1 / args.train_period_length / sample_times
-
             state_ = generate_state(next_observation)
 
             if args.algo == 'PPO':
                 next_value = agent.choose_action(state_, new_weights)[-2].item()
+
             else: next_value = 0
                             
             daily_return.append(trade_info["rate_of_return"])
 
             if args.algo == 'DPG' and agent.algo.buffer.__len__() == args.batch_size:
                 done = 1
+
             # store transition
             if args.algo == 'PPO':
                 agent.append(state, next_value, current_weights, action, action_log_prob, reward, done)
+
             elif args.algo == 'SAC':
                 agent.append(state, state_, current_weights, new_weights, use_action, reward, done)
+
             elif args.algo == 'DDPG':
                 agent.append(old_action, state, use_action, reward, state_, done)
+
             else:
                 raise NotImplementedError
             
@@ -100,6 +98,7 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
                 recorder.train.values.append(trade_info["portfolio_value"])
                 recorder.train.rewards.append(trajectory_reward)
                 break
+
     if args.algo == 'PPO' or args.algo == 'SAC':
         agent.update()
                 
@@ -108,12 +107,10 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
     # recorder
     agent.train_reward.append(mean_reward)
     agent.train_value.append(np.mean(recorder.train.values))
-    agent.train_acc.append(train_correct)
     # recorder
     
     print('=' * 120, '\nIter {}  Mean reward: {:.6f} Portfolio value: {:.4f}'
           .format(iteration, mean_reward, np.mean(recorder.train.values)))
-    
     return model_fn
 
 
@@ -135,16 +132,22 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
     
     quarter = str(year) + 'Q' + str(Q)
     print(quarter)
+
     if args.case == 3:
         path = create_q_path(path, quarter)
+
     write_abstract(args, path, target_stocks, train_start_date, train_end_date)
+
     for it in range(args.train_iter):
         agent.setup_seed_(seed)
         recorder.clear()
+
         model_fn = train(args, agent, recorder, target_stocks, train_history, train_dating, train_start_date, it+1, path)  
+
         args.val = True  
         test(args, agent, recorder, target_stocks, val_history,  val_dating, train_end_date,
              it+1, tu_his, model_fn=model_fn, path=path)
+
         use_time = time.time() - start_time
         remain_time = (use_time - last_use_time) * (args.train_iter - it - 1)
         print('Time usage: {:.0f} min {:.0f} s, remain: {:.0f} min {:.0f} s'

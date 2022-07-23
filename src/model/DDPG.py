@@ -1,11 +1,11 @@
-import random
 import numpy as np
+import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
 from collections import deque
-from .base import ActorCritic, setup_seed
+from .base import RLBase, ActorCritic
 
 
 EPS = 1e-8
@@ -23,6 +23,7 @@ class GaussianNoise:
 class OrnsteinUhlenbeckProcess:
     def __init__(self, args, mu, sigma=0.2, theta=.15, dimension=1e-2, x0=None,num_steps=12000):
         np.random.seed(args.seed)
+        
         self.theta = theta
         self.mu = mu
         self.sigma = sigma
@@ -60,17 +61,12 @@ class ReplayMemory:
         return (np.array(x) for x in zip(*transitions))
 
 
-class DDPG(nn.Module):
+class DDPG(RLBase):
     def __init__(self, args, action_dim):
-        super(DDPG, self).__init__()
-        setup_seed(args.seed)
-        self.action_dim = action_dim
-        self.args = args
-        self.device = args.device
-        self.state_length = args.state_length
-        self.batch_size = args.batch_size
-        self.gamma = args.gamma
+        super().__init__(args, action_dim)
+        self.action_noise = OrnsteinUhlenbeckProcess(self.args, np.zeros(self.action_dim))
         self.tau = args.tau
+
         self.behavior_network = ActorCritic(args, self.state_length, self.action_dim).to(self.device)
         self.actor_opt = optim.Adam(self.behavior_network.actor.parameters(), lr=args.lra)
         self.critic_opt = optim.Adam([{'params': self.behavior_network.critic.parameters()}, 
@@ -78,28 +74,14 @@ class DDPG(nn.Module):
                                       lr=self.args.lrv)
         self.target_network = ActorCritic(args, self.state_length, self.action_dim).to(self.device)
         self.target_network.load_state_dict(self.behavior_network.state_dict())
+
         self.memory = ReplayMemory(args, capacity=args.capacity)
-        self.relu = nn.ReLU()
-        self.action_noise = OrnsteinUhlenbeckProcess(self.args, np.zeros(self.action_dim))
-
-        #recorder
-        self.train_reward = []
-        self.train_value = []
-        self.val_reward = []
-        self.val_value = []
-        self.train_acc = []
-        self.val_acc = []
-        self.train_loss = []
-        self.val_loss = []
-        #recorder
-
-    def setup_seed_(self, seed):
-        setup_seed(seed)
 
     def choose_action(self, state, old_action, noise_inp=True):
         state = torch.FloatTensor(state[np.newaxis, :]).to(self.device)
         old_action = torch.FloatTensor(old_action[np.newaxis, :]).to(self.device) 
         _, action = self.behavior_network(state, old_action)
+
         if noise_inp == True:
             noise = self.action_noise.sample()
             noise = torch.FloatTensor(noise).to(self.device)
@@ -107,6 +89,7 @@ class DDPG(nn.Module):
             noised_action = self.relu(noised_action)
             noised_action /= torch.sum(noised_action)
             return noised_action.cpu().data.numpy().flatten()
+            
         else:
             return action.cpu().data.numpy().flatten()
     

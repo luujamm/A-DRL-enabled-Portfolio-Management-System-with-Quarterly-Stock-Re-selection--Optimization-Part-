@@ -1,6 +1,7 @@
 def write_abstract(args, path, stocks, start_date, end_date):
     file = path + '/abstract.txt'
     arg_dict = vars(args)
+    
     with open(file, 'w') as f:
         f.write('Target stocks: ' + str(stocks) + '\n')
         f.write('Train start date: ' + start_date + '\n')

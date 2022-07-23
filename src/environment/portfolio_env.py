@@ -1,10 +1,8 @@
 """
 Modified from https://github.com/wassname/rl-portfolio-management/blob/master/src/environments/portfolio.py
 """
-#from __future__ import print_function
-
-import numpy as np
 import copy
+import numpy as np
 
 from src.utils.data import date_to_index, index_to_date
 from src.utils.turbulence import tu_index
@@ -16,7 +14,9 @@ EPS = 1e-8
 class DataGenerator(object):
     def __init__(self, args, history, state_data, action_dim, dating, steps=500, start_idx=0, start_date=None):
         assert history.shape[0] == action_dim - 1, 'Number of stock is not consistent'
+
         np.random.seed(args.seed)
+
         self.args = args
         self.steps = steps
         self.state_length = args.state_length
@@ -24,6 +24,7 @@ class DataGenerator(object):
         self.start_date = start_date
         self.dating = dating
         self.bias = 50 
+
         # make immutable class
         self._history_data = history.copy()
         
@@ -42,7 +43,6 @@ class DataGenerator(object):
         else:
             # compute index corresponding to start_date for repeatable sequence
             self.idx = date_to_index(self.start_date, self.dating) - self.start_idx
-            #if self.args.algo == 'PPO' or self.args.val or self.args.test:
             self.steps = self._history_data.shape[1] - self.idx - 1
 
             assert self.idx >= self.state_length and self.idx <= self._history_data.shape[1] - self.steps, \
@@ -78,6 +78,7 @@ class PortfolioSim(object):
     def _step(self, w0, y0, w1, y1):      
         assert w1.shape == y1.shape, 'w1 and y1 must have the same shape'
         assert y1[0] == 1.0, 'y1[0] must be 1'
+
         p0 = self.p0 * np.dot(y0, w0)                               # ptfl value when open
         dw0 = (y0 * w0) / np.dot(y0, w0)                            # weight of open
         mu1 = self.cost * (np.abs(w1 - dw0)[1:]).sum()              # cost to change portfolio
@@ -108,7 +109,6 @@ class PortfolioSim(object):
             "cost": p0 * mu1 * np.dot(y1, w1) ,
         }
         self.infos.append(info)
-        
         return dw1, reward, excess_ew_return, info, done
 
 
@@ -116,7 +116,6 @@ class PortfolioEnv():
     def __init__(self, args, history, state_data, action_dim,
                  dating, tu_his, steps, time_cost=0.00, start_idx=0,
                  sample_start_date=None, epi_end_idx=None):
-        
         self.state_length = args.state_length
         self.num_stocks = history.shape[0]
         self.start_idx = start_idx
@@ -169,10 +168,13 @@ class PortfolioEnv():
         
         new_weights, reward, excess_ew_return, info, done2 = self.sim._step(weights, y_close_to_open, action, y_open_to_close)
         tu = tu_index(observation, self.tu_his)
+
         # calculate return for buy and hold a bit of each asset
         info['market_value'] = np.cumprod([inf["return"] for inf in self.infos + [info]])[-1]
+
         # add dates
         info['date'] = index_to_date(self.start_idx + self.src.idx + self.src.step, self.dating)
+        
         info['steps'] = self.src.step
         info['next_obs'] = ground_truth_obs  
         self.infos.append(info)

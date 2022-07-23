@@ -1,4 +1,5 @@
 import numpy as np
+
 from math import exp, log
 
 
@@ -15,8 +16,6 @@ def risk_free_return():
 def Sharpe_Ratio(daily_return):
     rfr = risk_free_return()
     SR = np.mean(daily_return - rfr + EPS) / (np.std(daily_return) + EPS) * TRADE_DAYS_PER_YEAR ** 0.5
-    #print('return: {:.3f}, std: {:.3f}'.format(np.mean(daily_return - rfr + EPS), np.std(daily_return)))
-    print(np.std(daily_return)*252**0.5)
     return SR
 
 
@@ -35,8 +34,10 @@ def max_drawdown(values):
         mdd1 = (trough - peak + EPS) / (peak + EPS)
         mdd2 = max_drawdown(values[: values.argmax()])
         mdd = min(mdd1, mdd2)
+
     else:
         mdd = 0
+
     return mdd
 
 

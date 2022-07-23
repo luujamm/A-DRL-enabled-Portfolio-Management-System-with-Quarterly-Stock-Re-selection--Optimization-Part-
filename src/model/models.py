@@ -6,10 +6,13 @@ import torch.nn as nn
 def create_model(args, day_length, action_dim):
     if args.model == 'tcn':
         model = CNN_tcn(args, day_length, action_dim)
+
     elif args.model == 'EIIE':
         model = CNN_EIIE(args, day_length, action_dim)
+
     else:
         raise NotImplementedError
+
     return model
 
 
@@ -91,6 +94,7 @@ class CNN_tcn(nn.Module):
         x1 = self.DConv1(s)                                 # DC Layer 1
         x2 = self.DConv2(s + x1)                            # DC Layer 2
         x3 = self.DConv3(s + x1 + x2)                       # DC Layer 3
+
         x = torch.cat((x1, x2, x3), 1)                      # concate
         x = self.Conv(x)
         x = self.Conv2(x)                                   # Layer 2
@@ -107,8 +111,8 @@ class CNN_EIIE(nn.Module): # Ensemble of Identical Independent Evaluators
         self.cvks1 = 3
         self.cvks2 = day_length
         self.in_ch1 = 3
-        self.out_ch1 = int(2*self.alpha)
-        self.out_ch2 = int(20*self.alpha)
+        self.out_ch1 = int(2 * self.alpha)
+        self.out_ch2 = int(20 * self.alpha)
         self.out_ch3 = 1
         self.action_dim = action_dim
         

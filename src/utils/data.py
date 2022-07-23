@@ -26,15 +26,21 @@ QUARTER_DATES = {
 
 def get_targets(year, Q, num=None):
     start_year = 2018
+
     with open('./data/company_buy_5_2.pickle', 'rb') as f:
         all_target = pickle.load(f)
+
         for t in all_target:
+
             if 'PYPL' in t:
                 t.remove('PYPL')
+
             if 'KHC' in t:
                 t.remove('KHC')
+
     if num == None:
         return all_target[year - start_year + Q - 1]
+
     else:
         return all_target[year - start_year + Q - 1][:num]
 
@@ -42,17 +48,21 @@ def get_targets(year, Q, num=None):
 def define_dates(args, year=None, Q=None):
     pretrain_start = '2002-01-01'
     turbulance_start = '2014-01-05'
+
     if args.case == 3:
         key = str(year) + '_Q' + str(Q) 
         quarter_dates = get_quarter_dates()
         train_start, train_end, val_end, test_end = (date for date in quarter_dates[key])
+
     else:
         raise ValueError('Case not defined')
         
     if args.test:
         return val_end, test_end
+
     elif args.backtest:
         return train_start, train_end
+
     else:
         return pretrain_start, turbulance_start, train_start, train_end, val_end
 
@@ -71,13 +81,16 @@ def get_init_action(dim, random=False, ew=False):
     if random:
         init_action = np.random.rand(dim)
         init_action /= np.sum(init_action)
+
     elif ew:
         init_action = np.ones(dim)
         init_action[0] = 0
         init_action /= np.sum(init_action)
+
     else:
         init_action = np.zeros(dim)
         init_action[0] = 1
+
     return init_action
 
 
@@ -97,8 +110,10 @@ def cash_state(obs):
     cash = np.ones((1, obs.shape[1], obs.shape[2]))
     rfr = np.array([1.0])
     rate = np.exp(np.log(rfr) / 365)
+
     for i in range(cash.shape[1]-1):
         cash[:, i+1:, :] *= rate
+
     return cash
 
 
@@ -127,22 +142,22 @@ def get_data_repo():
 def get_data(target_stocks, year, Q, status, bench=False):
     data_repo = get_data_repo()
     path = './' + data_repo + '/' + status + '/' + str(year) + 'Q' + str(Q)
+
     if bench:
         path += '_bench.csv'
+
     else:
         path += '.csv'
+
     df = pd.read_csv(path)
     df_hist = df[['date','open','high','low','close','volume','tic']]
-
     hist =[]
     
     for ticker in target_stocks:
         hist.append(np.expand_dims(df_hist[df_hist['tic']==ticker], axis=0))
 
     hist_np = np.concatenate(hist, axis=0)
-
     dating = hist_np[0][:,0]
-    
     history = hist_np[:,:,1:5]
     num_training_time = len(dating)
     
