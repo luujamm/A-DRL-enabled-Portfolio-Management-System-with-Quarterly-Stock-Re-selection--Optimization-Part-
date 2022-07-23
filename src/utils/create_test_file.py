@@ -2,10 +2,9 @@ import os
 from src.path import test_path
 from .data import get_years_and_quarters
 
-#dir = './save_/2022-02-26/003436/'
+
 def create_testfile():
     test_dir = test_path()
-
     years, quarters = get_years_and_quarters()
     case = 3
     testfile = test_dir + 'test.txt'
@@ -15,13 +14,10 @@ def create_testfile():
     for year in years:
         for Q in quarters:
             path = test_dir + str(year) + 'Q' + str(Q)
-            
-            #find = False
             for it in range(1000, 9, -1):
                 model =  path + '/agent_test' + str(case) + '_iter' + str(it) + '.pth'
-                if os.path.exists(model):#and not find:
+                if os.path.exists(model):
                     print('Testfile add ' + model)
                     with open(testfile, 'a') as f:
                         f.write(str(it) + '\n')
                     break
-                

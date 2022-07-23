@@ -1,9 +1,11 @@
 import numpy as np
 from math import exp, log
 
+
 EPS = 1e-8
 TRADE_DAYS_PER_YEAR = 252
 ANNUAL_RISK_FREE_RETURN = 1.01
+
 
 def risk_free_return():
     day_return = exp(log(ANNUAL_RISK_FREE_RETURN) / TRADE_DAYS_PER_YEAR)
@@ -40,4 +42,3 @@ def max_drawdown(values):
 
 def evaluation_metrics(daily_return, values):
     return Sharpe_Ratio(daily_return), Sortino_Ratio(daily_return), max_drawdown(values)
-

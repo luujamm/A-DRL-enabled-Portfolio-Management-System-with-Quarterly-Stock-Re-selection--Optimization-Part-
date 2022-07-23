@@ -4,7 +4,6 @@ import numpy as np
 
 from src.environment.portfolio_env import PortfolioEnv
 from src.utils.data import *
-from src.utils.yahoodownloader import get_data
 from src.utils.draw import draw_test_figs, show_test_results, show_val_results
 from src.utils.evaluation import evaluation_metrics
 from src.utils.recorder import Recorder
@@ -21,7 +20,6 @@ def test(args, agent, recorder, target_stocks, test_history,
     action_dim = len(target_stocks) + 1
     seeds = (args.seed + i for i in range(TEST_NUM)) 
     tu_list = []
-    
     test_history, test_dating, test_data = transform_data(args, test_history, test_dating)
     init_action = get_init_action(action_dim)
     
@@ -33,7 +31,6 @@ def test(args, agent, recorder, target_stocks, test_history,
         period_length = args.val_period_length
     else:
         period_length = args.test_period_length
-    
     
     for n_episode, seed in enumerate(seeds): 
         trajectory_reward = 0
@@ -93,13 +90,14 @@ def test(args, agent, recorder, target_stocks, test_history,
         
         recorder.test.rewards.append(trajectory_reward)
         
-        
     # recorder    
     agent.val_acc.append(test_correct)
     # recorder
+
     #val
     if test_dir == None: 
         show_val_results(args, agent, recorder, target_stocks, TEST_NUM, iteration, model_fn, path)
+        
     #test   
     else:
         output = show_test_results(args, recorder, target_stocks, TEST_NUM, iteration, test_dir)

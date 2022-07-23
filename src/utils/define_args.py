@@ -17,7 +17,6 @@ def define_args():
     parser.add_argument('--trading_cost', default=0.002, type=float)
     parser.add_argument('--state_length', default=50, type=int)
     parser.add_argument('--lam', default=0.5, type=float)
-    
     parser.add_argument('-l', '--train_period_length', default=652, type=int)
     parser.add_argument('-lv', '--val_period_length', default=102, type=int)
     parser.add_argument('-lt', '--test_period_length', default=64, type=int)
@@ -49,13 +48,11 @@ def define_args():
     # algo (SAC)
     parser.add_argument('-a', '--alpha', default=0.0002, type=float)
 
-
     # train
     parser.add_argument('--train_iter', default=30, type=int)
         
     # test
     parser.add_argument('-i', '--iter', default='all')
     parser.add_argument('--test_diff', default=[], type=list)
-    
     
     return parser.parse_args()

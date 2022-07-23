@@ -7,10 +7,9 @@ import matplotlib.pyplot as plt
 from src.test import test
 from src.environment.portfolio_env import PortfolioEnv
 from src.utils.data import *
-from src.utils.yahoodownloader import get_data
 from src.utils.create_repository import create_q_path
 from src.utils.abstract import write_abstract
-from src.utils.draw import draw_train_summary
+from src.utils.draw import show_train_results
 from src.utils.recorder import Recorder
 from src.utils.evaluation import risk_free_return
 
@@ -37,9 +36,6 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
     
     if args.algo == 'PPO':
         agent.std = agent.std_train
-    '''env = PortfolioEnv(args, train_history, train_data, action_dim, 
-                            train_dating, train_history, steps=args.train_period_length,
-                        sample_start_date=train_start_date)'''
                             
     for st in range(sample_times):
         if args.algo == 'DDPG':
@@ -72,7 +68,6 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
             if excess_ew_return > 0:
                 train_correct += 1 / args.train_period_length / sample_times
 
-            
             state_ = generate_state(next_observation)
 
             if args.algo == 'PPO':
@@ -90,8 +85,8 @@ def train(args, agent, recorder, target_stocks, train_history, train_dating, tra
                 agent.append(state, state_, current_weights, new_weights, use_action, reward, done)
             elif args.algo == 'DDPG':
                 agent.append(old_action, state, use_action, reward, state_, done)
-            else: #DPG
-                agent.append(state, state_, next_value, current_weights, action, action_log_prob, reward, done, trade_info['return'])
+            else:
+                raise NotImplementedError
             
             if args.algo == 'DDPG' and agent.memory.__len__() > args.batch_size:
                 agent.update()
@@ -157,6 +152,6 @@ def policy_learn(args, agent, target_stocks, path, year, Q):
         last_use_time = use_time
         seed+=SEED_STEP
 
-    draw_train_summary(args, agent, path)
+    show_train_results(args, agent, path)
     plt.plot(agent.train_loss)
     plt.savefig(path + '/loss.png')

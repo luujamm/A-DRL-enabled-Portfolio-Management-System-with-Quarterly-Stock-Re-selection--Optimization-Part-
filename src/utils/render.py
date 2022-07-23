@@ -4,9 +4,8 @@ import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from src.path import test_path
-from .data import get_years_and_quarters
+from .data import get_years_and_quarters, get_data_repo
 from .evaluation import evaluation_metrics
-from .yahoodownloader import get_data_repo
 
 
 def load_value(dates, values, file):
@@ -52,7 +51,6 @@ def render():
         pickle.dump(sp500s, f)
         pickle.dump(sp100s, f)
         pickle.dump(dates, f)
-
 
     plt.figure(figsize=(8, 6))
     ax = plt.subplot()

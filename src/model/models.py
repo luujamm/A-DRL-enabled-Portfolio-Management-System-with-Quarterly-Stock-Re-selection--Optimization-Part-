@@ -8,6 +8,8 @@ def create_model(args, day_length, action_dim):
         model = CNN_tcn(args, day_length, action_dim)
     elif args.model == 'EIIE':
         model = CNN_EIIE(args, day_length, action_dim)
+    else:
+        raise NotImplementedError
     return model
 
 
